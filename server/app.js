@@ -1,7 +1,8 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
-
+import jwt from 'jsonwebtoken'
+import { OAuth2Client } from 'google-auth-library'
 
 import { query } from './db/postgres.js';
 
@@ -14,6 +15,10 @@ app.use(express.json())
 // set up some midlleware to handle cors
 app.use(cors())
 
+//auth client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+
 // base route
 app.get('/', (_req, res) => {
     res.send("Welcome to MealMate!!! Your personal meal planner for yourself or a household")
@@ -23,6 +28,56 @@ app.get('/', (_req, res) => {
 app.get('/up', (_req, res) => {
   res.json({status: 'up'})
 })
+
+//Authentication with Google routes
+//Need to update UserInformation table to have id (autogenerates), google_id, email, name 
+app.post("/auth/google", async(req, res) => {
+    try{
+        const {idToken} = req.body 
+        const ticket = await googleClient.verifyIdToken({
+            idToken,
+            audience: process.env.GOOGLE_CLIENT_ID
+        })
+
+        const payload = ticket.getPayload()
+        const googleId = payload.sub
+        const email = payload.email
+        const name = payload.name
+
+        //check if user exists
+        const result = await query(
+            "SELECT * FROM UserInformation where google_id = $1", [googleId]
+        )
+
+        let user = result.rows[0]
+
+        //insert user if it doesn't exist
+        if(!user){
+            const insert = await query(
+                "INSERT into UserInformation (google_id, email, name) values ($1, $2, $3) RETURNING *", [googleId, email, name]
+            )
+
+            user = insert.rows[0]
+        }
+
+        //built the JWT token , expires in 7 days
+        const token = jwt.sign(
+            {
+                userId: user.id,
+                email: user.email
+            },
+            process.env.JWT_SECRET,{
+                expiresIn: "7d"
+            }
+        )
+
+        res.json({token})
+    }catch(error){
+        console.error("Google login error:", error)
+    }
+
+})
+
 
 //GroceryList
 //gets all the grocerylist in database
