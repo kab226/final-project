@@ -39,7 +39,7 @@ app.get('/grocery-list', (_req, res) =>{
 app.post('/grocery-list', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into GroceryList (ingredient, amount, recipe) values ('${body.ingredient}', '${body.amount}', '${body.recipe}')`
+        let qs =`INSERT into GroceryList (ingredient, amount, recipe, household_id) values ('${body.ingredient}', '${body.amount}', '${body.recipe}', ${body.househouse_id})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -82,7 +82,7 @@ app.get('/saved-recipes', (_req, res) =>{
 app.post('/saved-recipes', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into SavedRecipes (recipe, ingredients, notes) values ('${body.recipe}', '${body.ingredients}', '${body.notes}')`
+        let qs =`INSERT into SavedRecipes (recipe, ingredients, notes, saved_by) values ('${body.recipe}', '${body.ingredients}', '${body.notes}', ${body.saved_by})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -126,7 +126,7 @@ app.get('/users', (_req, res) =>{
 app.post('/users', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into UserInformation (user, password, household) values ('${body.user}', '${body.password}', '${body.houshold}')`
+        let qs =`INSERT into UserInformation (user, password, household, role) values ('${body.user}', '${body.password}', '${body.household}', '${body.role}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -137,7 +137,7 @@ app.put('/users/:id', (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE UserInformation SET user = '${body.user}', password = '${body.password}', household = '${body.household}' where id = ${id}`
+        let qs = `UPDATE UserInformation SET user = '${body.user}', password = '${body.password}', household = '${body.household}', role = '${body.role}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
@@ -171,7 +171,7 @@ app.get('/week-recipes', (_req, res) =>{
 app.post('/week-recipes', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into WeekRecipes (recipe, ingredients, day) values ('${body.recipe}', '${body.ingredients}', '${body.day}')`
+        let qs =`INSERT into WeekRecipes (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${household_id})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -194,6 +194,50 @@ app.delete('/week-recipes/:id', (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from WeekRecipes where id = ${id}`
+        query(qs).then(data => res.send(`${data.rowCount} row deleted`))
+    }catch(err){
+        res.send('error', err)
+    }
+})
+
+
+//Households
+//gets all the households in database
+app.get('/households', (_req, res) =>{
+    try{
+        const qs = `SELECT * from Households`
+        query(qs).then(data => {res.json(data.rows)})
+
+    }catch(err){
+        console.log(err)
+    }
+})
+//adds a new household to database
+app.post('/households', (req, res) => {
+    try {
+        let body = req.body
+        let qs =`INSERT into households (household_name) values ('${household_name}')`
+        query(qs).then(data => res.send(`${data.rowCount} row updated`))
+    } catch (error) {
+        res.send('error', err)
+    }
+})
+//updates an entry in the database based on the req body
+app.put('/households/:id', (req,res) => {
+    try{
+        const id = req.params.id
+        const body = req.body
+        let qs = `UPDATE households SET household_name = '${body.household_name}' where id = ${id}`
+        query(qs).then(data => res.send(`${data.rowCount} row updated`))
+    }catch (errr){
+        res.send('error', errr)
+    }
+})
+//deletes an entry based on the id
+app.delete('/households/:id', (req, res) => {
+    try{
+        const id = req.params.id
+        const qs = `DELETE from Households where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row deleted`))
     }catch(err){
         res.send('error', err)
