@@ -81,9 +81,10 @@ app.post("/auth/google", async(req, res) => {
 
 //GroceryList
 //gets all the grocerylist in database
-app.get('/grocery-list', (_req, res) =>{
+app.get('/grocery-list', (req, res) =>{
     try{
-        const qs = `SELECT * from GroceryList`
+        let body = req.body
+        const qs = `SELECT * from GroceryList where household_id = ${body.household_id}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -124,9 +125,10 @@ app.delete('/grocery-list/:id', (req, res) => {
 
 //SavedRecipes Table
 //gets all the saved recipes in database
-app.get('/saved-recipes', (_req, res) =>{
+app.get('/saved-recipes', (req, res) =>{
     try{
-        const qs = `SELECT * from SavedRecipes`
+        let body = req.body
+        const qs = `SELECT * from SavedRecipes where saved_by = ${body.saved_by}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -181,7 +183,7 @@ app.get('/users', (_req, res) =>{
 app.post('/users', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into UserInformation (user, password, household_id, role) values ('${body.user}', '${body.password}', ${body.household_id}, '${body.role}')`
+        let qs =`INSERT into UserInformation (user, google_id, email, household_id, role) values ('${body.user}', '${body.google_id}', '${body.email}', ${body.household_id}, '${body.role}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -192,7 +194,7 @@ app.put('/users/:id', (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE UserInformation SET user = '${body.user}', password = '${body.password}', household_id = ${body.household_id}, role = '${body.role}' where id = ${id}`
+        let qs = `UPDATE UserInformation SET user = '${body.user}', google_id = '${body.google_id}', email= '${body.email}', household_id = ${body.household_id}, role = '${body.role}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
@@ -212,9 +214,10 @@ app.delete('/users/:id', (req, res) => {
 
 //weeklyRecipes
 //gets all the recipes for the week in database
-app.get('/week-recipes', (_req, res) =>{
+app.get('/week-recipes', (req, res) =>{
     try{
-        const qs = `SELECT * from WeekRecipes`
+        let body = req.body
+        const qs = `SELECT * from WeekRecipes where household_id = ${body.household_id}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -271,7 +274,7 @@ app.get('/households', (_req, res) =>{
 app.post('/households', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into households (household_name) values ('${household_name}')`
+        let qs =`INSERT into households (household_name) values ('${body.household_name}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
