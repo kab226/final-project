@@ -157,7 +157,7 @@ app.delete('/users/:id', (req, res) => {
 
 //weeklyRecipes
 //gets all the recipes for the week in database
-app.get('/week-recipe', (_req, res) =>{
+app.get('/week-recipes', (_req, res) =>{
     try{
         const qs = `SELECT * from WeekRecipes`
         query(qs).then(data => {res.json(data.rows)})
