@@ -183,7 +183,7 @@ app.get('/users', (_req, res) =>{
 app.post('/users', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into UserInformation (user, google_id, email, household_id, role) values ('${body.user}', '${body.google_id}', '${body.email}', ${body.household_id}, '${body.role}')`
+        let qs =`INSERT into UserInformation (name, google_id, email, household_id, role) values ('${body.name}', '${body.google_id}', '${body.email}', ${body.household_id}, '${body.role}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -194,7 +194,7 @@ app.put('/users/:id', (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE UserInformation SET user = '${body.user}', google_id = '${body.google_id}', email= '${body.email}', household_id = ${body.household_id}, role = '${body.role}' where id = ${id}`
+        let qs = `UPDATE UserInformation SET name = '${body.name}', google_id = '${body.google_id}', email= '${body.email}', household_id = ${body.household_id}, role = '${body.role}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
