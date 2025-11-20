@@ -126,7 +126,7 @@ app.get('/users', (_req, res) =>{
 app.post('/users', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into UserInformation (user, password, household) values ('${body.user}', '${body.password}', '${body.houshold}')`
+        let qs =`INSERT into UserInformation (user, password, household, role) values ('${body.user}', '${body.password}', '${body.household}', ${body.role})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
