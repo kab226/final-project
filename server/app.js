@@ -216,7 +216,7 @@ app.get('/households', (_req, res) =>{
 app.post('/households', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into households (household_name) values ('${household_name}')`
+        let qs =`INSERT into households (household_name) values ('${body.household_name}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
