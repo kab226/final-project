@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react'
-import { GoogleOAuthProvider } from '@react-oauth/google';
-
+import { GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from "jwt-decode";
 function App() {
   const [apiStatus, setAPIStatus] = useState()
 
@@ -17,10 +17,18 @@ function App() {
   
   return (
     <div>
+      <GoogleLogin 
+      onSuccess ={(credentialResponse) => {
+        //will want to put this code on a longin page but is here for now
+        //Go somewhere after loging in 
+        //cedentialResponse holds user info 
+        //json Object with user info 
+        console.log(jwtDecode(credentialResponse.credential))
+      }} 
+      onError={() => console.log("Login failed")}/>
 
-
-    <h1>To get started, begin editing SRC/App.js</h1>
-    {apiStatus ? <h2>Testing app end point: <div style={{color: apiStatus.status === 'up' ? 'green':'red'}}>{apiStatus.status}</div></h2>:null }
+      <h1>To get started, begin editing SRC/App.js</h1>
+      {apiStatus ? <h2>Testing app end point: <div style={{color: apiStatus.status === 'up' ? 'green':'red'}}>{apiStatus.status}</div></h2>:null }
     </div>
   )
    
