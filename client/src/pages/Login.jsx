@@ -26,7 +26,7 @@ function Login(){
             
             localStorage.setItem("token", data.token)
 
-            navigate("/dashboard")
+            navigate("/household")
         }
         catch(err){
             console.error("Login error: ", err)
