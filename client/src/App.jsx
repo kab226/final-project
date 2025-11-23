@@ -5,6 +5,7 @@ import {BrowserRouter as Router, Routes, Route} from "react-router-dom"
 import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import ProtectedRoute from './components/ProtectedRoute'
+import HouseholdSetup from './pages/HouseholdSetup'
 
 function App() {
   // const [apiStatus, setAPIStatus] = useState()
@@ -25,7 +26,11 @@ function App() {
         <Route path = "/" element = {<Login />} />
 
         {/*Protecting this page*/}
-        <Route path = "/dashboard" element = {<ProtectedRoute><Dashboard/></ProtectedRoute>}/>
+        <Route element = {<ProtectedRoute/>}>
+            <Route path = "/household" element = {<HouseholdSetup/>}/>
+            <Route path = "/dashboard" element = {<Dashboard/>}/>
+        </Route>
+        
       </Routes>
     </Router>
 
