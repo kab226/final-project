@@ -4,6 +4,7 @@ import 'dotenv/config'
 import jwt from 'jsonwebtoken'
 import { OAuth2Client } from 'google-auth-library'
 
+
 import { query } from './db/postgres.js';
 
 // create the app
@@ -17,6 +18,27 @@ app.use(cors())
 
 //auth client
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
+
+
+//middleware?
+
+function authRequired(req, res, next){
+    const token = req.cookies.token
+    
+    if(!token)
+        return res.status(401).json({error: "Not authenticated"})
+
+    try{
+        const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        req.user = decoded 
+        next()
+    }
+    catch (err){
+        return res.status(401).json({error:"Invalid token"})
+    }
+}
+
+export default authRequired
 
 
 // base route
@@ -43,6 +65,8 @@ app.post("/auth/google", async(req, res) => {
         const googleId = payload.sub
         const email = payload.email
         const name = payload.name
+        const household_id = null
+        const role = "user"
 
         //check if user exists
         const result = await query(
@@ -54,7 +78,7 @@ app.post("/auth/google", async(req, res) => {
         //insert user if it doesn't exist
         if(!user){
             const insert = await query(
-                "INSERT into UserInformation (google_id, email, name) values ($1, $2, $3) RETURNING *", [googleId, email, name]
+                "INSERT into UserInformation (name, google_id, email, household_id, role) values ($1, $2, $3, $4, $5) RETURNING *", [name, googleId, email, household_id, role]
             )
 
             user = insert.rows[0]
@@ -83,8 +107,8 @@ app.post("/auth/google", async(req, res) => {
 //gets all the grocerylist in database
 app.get('/grocery-list', (req, res) =>{
     try{
-        let body = req.body
-        const qs = `SELECT * from GroceryList where household_id = ${body.household_id}`
+        let householdID = req.user.household_id
+        const qs = `SELECT * from GroceryList where household_id = ${householdID}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -127,8 +151,8 @@ app.delete('/grocery-list/:id', (req, res) => {
 //gets all the saved recipes in database
 app.get('/saved-recipes', (req, res) =>{
     try{
-        let body = req.body
-        const qs = `SELECT * from SavedRecipes where saved_by = ${body.saved_by}`
+        let id = req.user.id //fixed this to link it by user id
+        const qs = `SELECT * from SavedRecipes where saved_by = ${id}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -216,8 +240,8 @@ app.delete('/users/:id', (req, res) => {
 //gets all the recipes for the week in database
 app.get('/week-recipes', (req, res) =>{
     try{
-        let body = req.body
-        const qs = `SELECT * from WeekRecipes where household_id = ${body.household_id}`
+        const householdID = req.user.household_id
+        const qs = `SELECT * from WeekRecipes where household_id = ${householdID}`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){
@@ -229,7 +253,7 @@ app.get('/week-recipes', (req, res) =>{
 app.post('/week-recipes', (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into WeekRecipes (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${household_id})`
+        let qs =`INSERT into WeekRecipes (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${body.household_id})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -271,28 +295,28 @@ app.get('/households', (_req, res) =>{
     }
 })
 //adds a new household to database
-app.post('/households', (req, res) => {
+app.post('/households', authRequired, (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into households (household_name) values ('${body.household_name}')`
+        let qs =`INSERT into Households (household_name) values ('${body.household_name}')`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
     }
 })
 //updates an entry in the database based on the req body
-app.put('/households/:id', (req,res) => {
+app.put('/households/:id', authRequired, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE households SET household_name = '${body.household_name}' where id = ${id}`
+        let qs = `UPDATE Households SET household_name = '${body.household_name}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
     }
 })
 //deletes an entry based on the id
-app.delete('/households/:id', (req, res) => {
+app.delete('/households/:id', authRequired, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from Households where id = ${id}`
@@ -301,6 +325,43 @@ app.delete('/households/:id', (req, res) => {
         res.send('error', err)
     }
 })
+
+app.post('/households/join', authRequired, (req, res) => {
+    const {household_name} = req.body
+    try{
+        //check if household exists
+        const qs = `SELECT household_id FROM Households WHERE household_name =  $1`
+        query(qs, [household_name]).then(data => {
+            let householdID
+
+            if (data.rows.length === 0){
+                const createQS = `INSERT into Households (household_name) VALUES ($1) RETURNING household_id`
+                query(createQS, [household_name]).then(data => {
+                    householdID = data.rows[0].household_id
+
+                    const updateQS = `UPDATE UserInformation set household_id = $1 WHERE id = $2`
+                    query(updateQS, [householdID, req.user.id])
+
+                    res.json({joined: true, household_id: householdID})
+                })
+            }else{
+                //household already exists
+                householdID = data.rows[0].household_id
+
+                const updateQS = `UPDATE UserInformation set household_id = $1 WHERE id = $2`
+
+                query(updateQS, [householdID, req.user.id])
+
+                res.json({joined: true, household_id: householdID})
+            }
+
+        })
+    } catch(err){
+        console.error(err)
+        res.status(500).json({error: "Server error joining household"})
+    }
+})
+
 
 app.listen(app.get('port'), () => {
     console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
