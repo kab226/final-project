@@ -1,4 +1,5 @@
 import { GoogleLogin } from '@react-oauth/google';
+import {jwtDecode} from 'jwt-decode'
 import { useNavigate } from 'react-router-dom';
 
 function Login(){
@@ -6,7 +7,7 @@ function Login(){
 
     const handleSuccess = async (credentialResponse) => {
         try{
-            const idToken = credentialResponse.credential
+            const idToken = jwtDecode(credentialResponse.credential)
 
             const res = await fetch("http://localhost:3000/auth/google", {
                 method: "POST",
@@ -44,7 +45,7 @@ function Login(){
             }}
         >
             <h1>Sign in with Google</h1>
-            
+
             <GoogleLogin onSuccess={handleSuccess}
             //The following is Josh's code - I made a function to handle some more of the backend stuff
             // onSuccess ={(credentialResponse) => {
