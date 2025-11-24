@@ -7,7 +7,7 @@ function Login(){
 
     const handleSuccess = async (credentialResponse) => {
         try{
-            const idToken = jwtDecode(credentialResponse.credential)
+            const idToken = credentialResponse.credential
 
             const res = await fetch("http://localhost:3000/auth/google", {
                 method: "POST",

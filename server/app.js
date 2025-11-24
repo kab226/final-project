@@ -2,7 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
 import jwt from 'jsonwebtoken'
-import { OAuth2Client } from 'google-auth-library'
+import { auth, OAuth2Client } from 'google-auth-library'
 
 
 import { query } from './db/postgres.js';
@@ -23,12 +23,22 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 //middleware?
 
 function authRequired(req, res, next){
-    const token = req.cookies.token
+    //get auth. header from the request
+    const authHeader = req.headers.authorization
+
+    //header needs to have 'Bearer' to be authenticated
+    if (!authHeader | !authHeader.startsWith('Bearer ')){
+        return res.status(401).json({error: "Not authenticated. Missing Bearer token"})
+    }
+
+    //split to token part from the header
+    const token = authHeader.split(' ')[1]
     
     if(!token)
         return res.status(401).json({error: "Not authenticated"})
 
     try{
+        //verifies token using secret one (generated with the terminal command "node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"" )
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         req.user = decoded 
         next()
@@ -38,7 +48,7 @@ function authRequired(req, res, next){
     }
 }
 
-export default authRequired
+
 
 
 // base route
@@ -105,7 +115,7 @@ app.post("/auth/google", async(req, res) => {
 
 //GroceryList
 //gets all the grocerylist in database
-app.get('/grocery-list', (req, res) =>{
+app.get('/grocery-list', authRequired, (req, res) =>{
     try{
         let householdID = req.user.household_id
         const qs = `SELECT * from GroceryList where household_id = ${householdID}`
@@ -116,7 +126,7 @@ app.get('/grocery-list', (req, res) =>{
     }
 })
 //adds a new ingredient to database
-app.post('/grocery-list', (req, res) => {
+app.post('/grocery-list', authRequired, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into GroceryList (ingredient, amount, recipe, household_id) values ('${body.ingredient}', '${body.amount}', '${body.recipe}', ${body.househouse_id})`
@@ -126,7 +136,7 @@ app.post('/grocery-list', (req, res) => {
     }
 })
 //updates an entry in the database based on the req body
-app.put('/grocery-list/:id', (req,res) => {
+app.put('/grocery-list/:id', authRequired, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -137,7 +147,7 @@ app.put('/grocery-list/:id', (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/grocery-list/:id', (req, res) => {
+app.delete('/grocery-list/:id', authRequired, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from GroceryList where id = ${id}`
@@ -149,7 +159,7 @@ app.delete('/grocery-list/:id', (req, res) => {
 
 //SavedRecipes Table
 //gets all the saved recipes in database
-app.get('/saved-recipes', (req, res) =>{
+app.get('/saved-recipes', authRequired, (req, res) =>{
     try{
         let id = req.user.id //fixed this to link it by user id
         const qs = `SELECT * from SavedRecipes where saved_by = ${id}`
@@ -160,7 +170,7 @@ app.get('/saved-recipes', (req, res) =>{
     }
 })
 //adds a new recipe to database
-app.post('/saved-recipes', (req, res) => {
+app.post('/saved-recipes', authRequired, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into SavedRecipes (recipe, ingredients, notes, saved_by) values ('${body.recipe}', '${body.ingredients}', '${body.notes}', ${body.saved_by})`
@@ -170,7 +180,7 @@ app.post('/saved-recipes', (req, res) => {
     }
 })
 //updates an entry in the database based on the req body
-app.put('/saved-recipes/:id', (req,res) => {
+app.put('/saved-recipes/:id', authRequired, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -181,7 +191,7 @@ app.put('/saved-recipes/:id', (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/saved-recipes/:id', (req, res) => {
+app.delete('/saved-recipes/:id', authRequired, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from SavedRecipes where id = ${id}`
@@ -238,7 +248,7 @@ app.delete('/users/:id', (req, res) => {
 
 //weeklyRecipes
 //gets all the recipes for the week in database
-app.get('/week-recipes', (req, res) =>{
+app.get('/week-recipes', authRequired, (req, res) =>{
     try{
         const householdID = req.user.household_id
         const qs = `SELECT * from WeekRecipes where household_id = ${householdID}`
@@ -250,7 +260,7 @@ app.get('/week-recipes', (req, res) =>{
 })
 
 //adds a new recipe to database
-app.post('/week-recipes', (req, res) => {
+app.post('/week-recipes', authRequired, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into WeekRecipes (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${body.household_id})`
@@ -261,7 +271,7 @@ app.post('/week-recipes', (req, res) => {
 })
 
 //updates an entry in the database based on the req body
-app.put('/week-recipes/:id', (req,res) => {
+app.put('/week-recipes/:id', authRequired, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -272,7 +282,7 @@ app.put('/week-recipes/:id', (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/week-recipes/:id', (req, res) => {
+app.delete('/week-recipes/:id', authRequired, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from WeekRecipes where id = ${id}`
