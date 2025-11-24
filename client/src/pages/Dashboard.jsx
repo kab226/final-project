@@ -18,6 +18,11 @@ function Dashboard(){
     const [selectedDate, setSelectedDate] = useState(null)
     const [customNotes, setCustomNotes] = useState("")
     
+    //retrieves the JWT and uses it in authorization header of fetches
+    const [message, setMessage] = useState("Loading dashboard data...")
+
+
+
     //load in weekly calendar
     const loadWeekRecipes = async() => {
         fetch("http://localhost:3000/week-recipes", {
