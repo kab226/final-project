@@ -4,7 +4,8 @@ import './index.css'
 import App from './App.jsx'
 import { GoogleOAuthProvider } from '@react-oauth/google';
 //I think we may want to remove this client_id - I moved it to env
-const client_id = process.env.GOOGLE_CLIENT_ID
+
+const client_id = import.meta.env.VITE_GOOGLE_CLIENT_ID
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <GoogleOAuthProvider clientId = {client_id}>     
