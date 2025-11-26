@@ -1,5 +1,4 @@
 import { GoogleLogin } from '@react-oauth/google';
-import {jwtDecode} from 'jwt-decode'
 import { useNavigate } from 'react-router-dom';
 
 function Login(){
@@ -12,10 +11,12 @@ function Login(){
             const res = await fetch("http://localhost:3000/auth/google", {
                 method: "POST",
                 headers:{
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json" 
+                    
                 },
                 body: JSON.stringify({idToken})
             })
+
 
             if(!res.ok){
                 throw new Error("Backend login failed")
@@ -25,7 +26,8 @@ function Login(){
 
             //stores the JWT
             
-            localStorage.setItem("token", data.token)
+            localStorage.setItem("x-user", res.email)
+            localStorage.setItem("role", res.role)
 
             navigate("/household")
         }
