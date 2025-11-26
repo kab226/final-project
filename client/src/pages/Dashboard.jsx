@@ -24,7 +24,7 @@ function Dashboard(){
     //load in weekly calendar
     const loadWeekRecipes = async() => {
         fetch("http://localhost:3000/week-recipes", {
-            credentials:"include"
+            headers: {"x-user": localStorage.getItem("x-user")}
         }).then(res => res.json()).then(data => setWeekRecipes(
             data.map(r => ({
                 id: r.id, 
@@ -39,7 +39,7 @@ function Dashboard(){
 
     useEffect(() => {
         fetch("http://localhost:3000/saved-recipes", {
-            credentials:"include"
+            headers: {"x-user": localStorage.getItem("x-user")}
         }).then(res => res.json()).then(data => setSavedRecipes(data))
     }, [])
 
@@ -59,9 +59,9 @@ function Dashboard(){
         const newDay = info.event.startStr
         try{
             await fetch(`http://localhost:3000/week-recipes/${id}`, {
-                method: "PUT", 
-                credentials: "include", 
-                headers: {"Content-Type": "application/json"},
+                method: "PUT",  
+                headers: {"Content-Type": "application/json", 
+                    "x-user": localStorage.getItem("x-user")},
                 body: JSON.stringify({
                     recipe: title,
                     ingredients: "[]",
@@ -82,8 +82,8 @@ function Dashboard(){
         try{
         await fetch("http://localhost:3000/week-recipes", {
             method: "POST", 
-            credentials: "include", 
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json",
+                "x-user": localStorage.getItem("x-user")},
             body: JSON.stringify({
                 recipe: recipe.strMeal || recipe.recipe,
                 ingredients: JSON.stringify(recipe.ingredients || []),
