@@ -1,9 +1,9 @@
 import {Navigate} from "react-router-dom"
 //this blocks access if not authenticated
 function ProtectedRoute ({children}){
-    const token = localStorage.getItem("token")
+    const authKey = localStorage.getItem("x-user")
 
-    if (!token){
+    if (!authKey){
         return <Navigate to="/" replace />
     }
 
