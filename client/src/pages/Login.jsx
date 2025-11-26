@@ -12,7 +12,6 @@ function Login(){
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json" 
-                    
                 },
                 body: JSON.stringify({idToken})
             })
@@ -26,8 +25,8 @@ function Login(){
 
             //stores the JWT
             
-            localStorage.setItem("x-user", res.email)
-            localStorage.setItem("role", res.role)
+            localStorage.setItem("x-user", data.email)
+            localStorage.setItem("role", data.role)
 
             navigate("/household")
         }

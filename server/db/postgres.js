@@ -8,8 +8,8 @@ const client = new Client({
     database: process.env.POSTGRES_DBNAME,
     user: process.env.POSTGRES_USER,
     password: process.env.POSTGRES_PASSWORD,
-    //added this so hopefully we can still use pg
-    connectionString: process.env.SUPABASE_URL,
+    // //added this so hopefully we can still use pg
+    // connectionString: process.env.SUPABASE_URL,
     ssl: {
         rejectUnauthorized: false
     }
