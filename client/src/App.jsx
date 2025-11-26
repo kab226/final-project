@@ -8,18 +8,8 @@ import ProtectedRoute from './components/ProtectedRoute'
 import HouseholdSetup from './pages/HouseholdSetup'
 
 function App() {
-  // const [apiStatus, setAPIStatus] = useState()
-
-  // useEffect(() => {
-  //   fetch('http://localhost:3000/up')
-  //   .then(res => res.json())
-  //   .then(result => {
-  //     console.log(result.status)
-  //     setAPIStatus(result)
-  // })
-  // }, [])
-
   
+
   return (
     <Router>
       <Routes>

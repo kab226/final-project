@@ -1,10 +1,7 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
-import jwt from 'jsonwebtoken'
-import { auth, OAuth2Client } from 'google-auth-library'
-
-
+import { OAuth2Client } from 'google-auth-library'
 import { query } from './db/postgres.js';
 
 // create the app
@@ -13,41 +10,46 @@ const app = express()
 app.set('port', process.env.PORT || 3000);
 // set up some middleware to handle processing body requests
 app.use(express.json())
-// set up some midlleware to handle cors
+// set up some midlleware to handle cors - added some to fix jwt issues
 app.use(cors())
 
-//auth client
+
+//auth client 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
+//Put approved admin emails here 
+const approvedAdmins = []
 
-//middleware?
-
-function authRequired(req, res, next){
-    //get auth. header from the request
-    const authHeader = req.headers.authorization
-
-    //header needs to have 'Bearer' to be authenticated
-    if (!authHeader | !authHeader.startsWith('Bearer ')){
-        return res.status(401).json({error: "Not authenticated. Missing Bearer token"})
-    }
-
-    //split to token part from the header
-    const token = authHeader.split(' ')[1]
-    
-    if(!token)
-        return res.status(401).json({error: "Not authenticated"})
-
+//middleware similar to class 
+async function requireUser(req, res, next){
     try{
-        //verifies token using secret one (generated with the terminal command "node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"" )
-        const decoded = jwt.verify(token, process.env.JWT_SECRET)
-        req.user = decoded 
+        const email = req.headers['x-user']
+
+        if(!email){
+            return res.status(401).json({error:"Not Authenticated"})
+        }
+
+        const result = await query(`SELECT * FROM UserInformation WHERE email = $1`, [email])
+        
+        if (result.rows.length ===0){
+            return res.status(401).json({error:"Not Authenticated"})
+        }
+
+        req.user = result.rows[0]
         next()
-    }
-    catch (err){
-        return res.status(401).json({error:"Invalid token"})
+    }catch(err){
+        console.error(err)
+        res.status(500).json({error: "Server error"})
     }
 }
 
+
+function requireAdmin(req, res, next){
+    if(!req.user || req.user.role !== "admin"){
+        return res.status(403).json({error:"Forbidden"})
+    }
+    next()
+}
 
 
 
@@ -66,48 +68,55 @@ app.get('/up', (_req, res) => {
 app.post("/auth/google", async(req, res) => {
     try{
         const {idToken} = req.body 
+
         const ticket = await googleClient.verifyIdToken({
             idToken,
             audience: process.env.GOOGLE_CLIENT_ID
         })
-
+        
         const payload = ticket.getPayload()
+
         const googleId = payload.sub
         const email = payload.email
         const name = payload.name
-        const household_id = null
-        const role = "user"
+
 
         //check if user exists
-        const result = await query(
-            "SELECT * FROM UserInformation where google_id = $1", [googleId]
+        const existingUser = await query(
+            "SELECT * FROM UserInformation where email = $1", [email]
         )
 
-        let user = result.rows[0]
+        let user = existingUser.rows[0]
 
         //insert user if it doesn't exist
         if(!user){
+            const role = approvedAdmins.includes(email) ? "admin" : "user"
+
             const insert = await query(
-                "INSERT into UserInformation (name, google_id, email, household_id, role) values ($1, $2, $3, $4, $5) RETURNING *", [name, googleId, email, household_id, role]
+                "INSERT into UserInformation (name, google_id, email, household_id, role) values ($1, $2, $3, NULL, $5) RETURNING *", [name, googleId, email, role]
             )
 
             user = insert.rows[0]
         }
 
-        //built the JWT token , expires in 7 days
-        const token = jwt.sign(
-            {
-                userId: user.id,
-                email: user.email
-            },
-            process.env.JWT_SECRET,{
-                expiresIn: "7d"
-            }
-        )
+        const addAdmin = approvedAdmins.includes(email)
 
-        res.json({token})
+        if (user.role !== "admin" && addAdmin){
+            const update = await query(
+                `UPDATE UserInformation SET role = 'admin' WHERE email = $1 RETURNING *`, [email]
+            )
+
+            user = update.rows[0]
+        }
+
+        res.json({
+            email: user.email,
+            role: user.role
+        })
+
     }catch(error){
         console.error("Google login error:", error)
+        res.status(400).jsonn({error: "Invalid Google token"})
     }
 
 })
@@ -115,7 +124,7 @@ app.post("/auth/google", async(req, res) => {
 
 //GroceryList
 //gets all the grocerylist in database
-app.get('/grocery-list', authRequired, (req, res) =>{
+app.get('/grocery-list', requireUser, (req, res) =>{
     try{
         let householdID = req.user.household_id
         const qs = `SELECT * from GroceryList where household_id = ${householdID}`
@@ -126,17 +135,17 @@ app.get('/grocery-list', authRequired, (req, res) =>{
     }
 })
 //adds a new ingredient to database
-app.post('/grocery-list', authRequired, (req, res) => {
+app.post('/grocery-list', requireUser, (req, res) => {
     try {
         let body = req.body
-        let qs =`INSERT into GroceryList (ingredient, amount, recipe, household_id) values ('${body.ingredient}', '${body.amount}', '${body.recipe}', ${body.househouse_id})`
+        let qs =`INSERT into GroceryList (ingredient, amount, recipe, household_id) values ('${body.ingredient}', '${body.amount}', '${body.recipe}', ${body.household_id})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
     }
 })
 //updates an entry in the database based on the req body
-app.put('/grocery-list/:id', authRequired, (req,res) => {
+app.put('/grocery-list/:id', requireUser, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -147,7 +156,7 @@ app.put('/grocery-list/:id', authRequired, (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/grocery-list/:id', authRequired, (req, res) => {
+app.delete('/grocery-list/:id', requireUser, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from GroceryList where id = ${id}`
@@ -159,7 +168,7 @@ app.delete('/grocery-list/:id', authRequired, (req, res) => {
 
 //SavedRecipes Table
 //gets all the saved recipes in database
-app.get('/saved-recipes', authRequired, (req, res) =>{
+app.get('/saved-recipes', requireUser, (req, res) =>{
     try{
         let id = req.user.id //fixed this to link it by user id
         const qs = `SELECT * from SavedRecipes where saved_by = ${id}`
@@ -170,7 +179,7 @@ app.get('/saved-recipes', authRequired, (req, res) =>{
     }
 })
 //adds a new recipe to database
-app.post('/saved-recipes', authRequired, (req, res) => {
+app.post('/saved-recipes',requireUser, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into SavedRecipes (recipe, ingredients, notes, saved_by) values ('${body.recipe}', '${body.ingredients}', '${body.notes}', ${body.saved_by})`
@@ -180,7 +189,7 @@ app.post('/saved-recipes', authRequired, (req, res) => {
     }
 })
 //updates an entry in the database based on the req body
-app.put('/saved-recipes/:id', authRequired, (req,res) => {
+app.put('/saved-recipes/:id', requireUser, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -191,7 +200,7 @@ app.put('/saved-recipes/:id', authRequired, (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/saved-recipes/:id', authRequired, (req, res) => {
+app.delete('/saved-recipes/:id', requireUser, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from SavedRecipes where id = ${id}`
@@ -204,7 +213,7 @@ app.delete('/saved-recipes/:id', authRequired, (req, res) => {
 
 //UserInformation
 //gets all the users in database
-app.get('/users', (_req, res) =>{
+app.get('/users', requireAdmin, (_req, res) =>{
     try{
         const qs = `SELECT * from UserInformation`
         query(qs).then(data => {res.json(data.rows)})
@@ -214,7 +223,7 @@ app.get('/users', (_req, res) =>{
     }
 })
 //adds a new user to database
-app.post('/users', (req, res) => {
+app.post('/users', requireAdmin, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into UserInformation (name, google_id, email, household_id, role) values ('${body.name}', '${body.google_id}', '${body.email}', ${body.household_id}, '${body.role}')`
@@ -224,7 +233,7 @@ app.post('/users', (req, res) => {
     }
 })
 //updates an entry in the database based on the req body
-app.put('/users/:id', (req,res) => {
+app.put('/users/:id', requireAdmin, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -235,7 +244,7 @@ app.put('/users/:id', (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/users/:id', (req, res) => {
+app.delete('/users/:id', requireAdmin, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from UserInformation where id = ${id}`
@@ -248,7 +257,7 @@ app.delete('/users/:id', (req, res) => {
 
 //weeklyRecipes
 //gets all the recipes for the week in database
-app.get('/week-recipes', authRequired, (req, res) =>{
+app.get('/week-recipes', requireUser, (req, res) =>{
     try{
         const householdID = req.user.household_id
         const qs = `SELECT * from WeekRecipes where household_id = ${householdID}`
@@ -260,7 +269,7 @@ app.get('/week-recipes', authRequired, (req, res) =>{
 })
 
 //adds a new recipe to database
-app.post('/week-recipes', authRequired, (req, res) => {
+app.post('/week-recipes', requireUser, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into WeekRecipes (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${body.household_id})`
@@ -271,7 +280,7 @@ app.post('/week-recipes', authRequired, (req, res) => {
 })
 
 //updates an entry in the database based on the req body
-app.put('/week-recipes/:id', authRequired, (req,res) => {
+app.put('/week-recipes/:id', requireUser, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -282,7 +291,7 @@ app.put('/week-recipes/:id', authRequired, (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/week-recipes/:id', authRequired, (req, res) => {
+app.delete('/week-recipes/:id', requireUser,  (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from WeekRecipes where id = ${id}`
@@ -295,7 +304,7 @@ app.delete('/week-recipes/:id', authRequired, (req, res) => {
 
 //Households
 //gets all the households in database
-app.get('/households', (_req, res) =>{
+app.get('/households', requireUser, (_req, res) =>{
     try{
         const qs = `SELECT * from Households`
         query(qs).then(data => {res.json(data.rows)})
@@ -305,7 +314,7 @@ app.get('/households', (_req, res) =>{
     }
 })
 //adds a new household to database
-app.post('/households', authRequired, (req, res) => {
+app.post('/households', requireUser, (req, res) => {
     try {
         let body = req.body
         let qs =`INSERT into Households (household_name) values ('${body.household_name}')`
@@ -315,7 +324,7 @@ app.post('/households', authRequired, (req, res) => {
     }
 })
 //updates an entry in the database based on the req body
-app.put('/households/:id', authRequired, (req,res) => {
+app.put('/households/:id', requireUser, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
@@ -326,7 +335,7 @@ app.put('/households/:id', authRequired, (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/households/:id', authRequired, (req, res) => {
+app.delete('/households/:id', requireUser, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from Households where id = ${id}`
@@ -336,7 +345,7 @@ app.delete('/households/:id', authRequired, (req, res) => {
     }
 })
 
-app.post('/households/join', authRequired, (req, res) => {
+app.post('/households/join', requireUser, (req, res) => {
     const {household_name} = req.body
     try{
         //check if household exists
