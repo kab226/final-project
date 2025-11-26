@@ -18,8 +18,6 @@ function Dashboard(){
     const [selectedDate, setSelectedDate] = useState(null)
     const [customNotes, setCustomNotes] = useState("")
     
-    //retrieves the JWT and uses it in authorization header of fetches
-    const [message, setMessage] = useState("Loading dashboard data...")
 
 
 
