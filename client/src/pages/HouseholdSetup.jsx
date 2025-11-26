@@ -14,7 +14,9 @@ function HouseholdSetup(){
         const loadHouseholds = async() => {
             try{
                 const res = await fetch("http://localhost:3000/households", {
-                    credentials: "include"
+                    headers:{
+                        "x-user": localStorage.getItem("x-user")
+                    }
                 })
 
                 const data = await res.json()
@@ -24,8 +26,9 @@ function HouseholdSetup(){
                 console.error("Failed to load households: ", err)
             }
 
-            loadHouseholds()
+            
         }
+        loadHouseholds()
 
     }, [])
 
@@ -42,8 +45,9 @@ function HouseholdSetup(){
         try{
             const res = await fetch("http://localhost:3000/households/join", {
                 method:"POST",
-                headers:{"Content-Type": "application/json"},
-                credentials: "include",
+                headers:{"Content-Type": "application/json", 
+                        "x-user": localStorage.getItem("x-user")
+                    },
                 body: JSON.stringify({household_name: nameUsed})
 
             })
