@@ -6,14 +6,14 @@ function Login(){
 
     const handleSuccess = async (credentialResponse) => {
         try{
-            const idToken = credentialResponse.credential
+            // const idToken = credentialResponse.credential
 
             const res = await fetch("http://localhost:3000/auth/google", {
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json" 
                 },
-                body: JSON.stringify({idToken})
+                body: JSON.stringify({idToken: credentialResponse.credential,})
             })
 
 

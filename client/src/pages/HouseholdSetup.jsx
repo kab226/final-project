@@ -1,5 +1,5 @@
 import {FormControl, InputLabel, Select, MenuItem, TextField,  Button} from "@mui/material"
-import {useState} from "react"
+import {useState, useEffect} from "react"
 import { useNavigate } from "react-router-dom"
 
 function HouseholdSetup(){
@@ -80,7 +80,7 @@ function HouseholdSetup(){
                 <InputLabel id = "household-select">
                     Select Existing Household
                 </InputLabel>
-                <Select labelID = "household-select" value = {selected} label = "Select Existing Household" 
+                <Select labelId = "household-select" value = {selected} label = "Select Existing Household" 
                     onChange={(e) => {
                         setSelected(e.target.value)
                         setName("")
@@ -99,7 +99,7 @@ function HouseholdSetup(){
                     setName(e.target.value)
                     setSelected("")
                 }}/>
-            <Button onClick={join} variant = "contained" sx= {{ fontSize: 18, padding: "10 px 24px", mt: 1}}>
+            <Button onClick={join} variant = "contained" sx= {{ fontSize: 18, padding: "10px 24px", mt: 1}}>
                 Continue
             </Button>
 
