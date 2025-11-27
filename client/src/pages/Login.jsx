@@ -7,15 +7,14 @@ function Login(){
 
     const handleSuccess = async (credentialResponse) => {
         try{
-            //decode to fix what I think is the issue with the response
-            const idToken = jwtDecode(credentialResponse.credential)
+            // const idToken = credentialResponse.credential
 
             const res = await fetch("http://localhost:3000/auth/google", {
                 method: "POST",
                 headers:{
                     "Content-Type": "application/json" 
                 },
-                body: JSON.stringify({idToken})
+                body: JSON.stringify({idToken: credentialResponse.credential,})
             })
 
 
