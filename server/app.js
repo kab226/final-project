@@ -69,6 +69,7 @@ app.get('/up', (_req, res) => {
 //Authentication with Google routes
 //Need to update UserInformation table to have id (autogenerates), google_id, email, name 
 app.post("/auth/google", async(req, res) => {
+    // console.log("Received body:", req.body)
     try{
         const {idToken} = req.body 
 
@@ -106,7 +107,7 @@ app.post("/auth/google", async(req, res) => {
 
         if (user.role !== "admin" && addAdmin){
             const update = await query(
-                `UPDATE "UserInformation" SET role = 'admin' WHERE email = $1 RETURNING *`, [email]
+                `UPDATE "UserInformation" SET role = 'admin' WHERE email = $1`, [email]
             )
 
             user = update.rows[0]
