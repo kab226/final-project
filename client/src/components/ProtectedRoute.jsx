@@ -1,12 +1,12 @@
-import {Navigate} from "react-router-dom"
+import {Navigate, Outlet} from "react-router-dom"
 //this blocks access if not authenticated
-function ProtectedRoute ({children}){
+function ProtectedRoute (){
     const authKey = localStorage.getItem("x-user")
 
     if (!authKey){
         return <Navigate to="/" replace />
     }
 
-    return children
+    return <Outlet />
 }
 export default ProtectedRoute
