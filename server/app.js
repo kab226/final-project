@@ -97,7 +97,7 @@ app.post("/auth/google", async(req, res) => {
             const role = approvedAdmins.includes(email) ? "admin" : "user"
 
             const insert = await query(
-                `INSERT into "UserInformation" (name, google_id, email, household_id, role) values ($1, $2, $3, NULL, $4) `, [name, googleId, email, role]
+                `INSERT into "UserInformation" (name, google_id, email, household_id, role) values ($1, $2, $3, NULL, $4) RETURNING *`, [name, googleId, email, role]
             )
 
             user = insert.rows[0]
@@ -107,7 +107,7 @@ app.post("/auth/google", async(req, res) => {
 
         if (user.role !== "admin" && addAdmin){
             const update = await query(
-                `UPDATE "UserInformation" SET role = 'admin' WHERE email = $1`, [email]
+                `UPDATE "UserInformation" SET role = 'admin' WHERE email = $1 RETURNING *`, [email]
             )
 
             user = update.rows[0]
