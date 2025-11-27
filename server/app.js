@@ -32,7 +32,7 @@ async function requireUser(req, res, next){
             return res.status(401).json({error:"Not Authenticated"})
         }
 
-        const result = await query(`SELECT * FROM 'UserInformation" WHERE email = $1`, [email])
+        const result = await query(`SELECT * FROM "UserInformation" WHERE email = $1`, [email])
         
         if (result.rows.length ===0){
             return res.status(401).json({error:"Not Authenticated"})
@@ -97,7 +97,7 @@ app.post("/auth/google", async(req, res) => {
             const role = approvedAdmins.includes(email) ? "admin" : "user"
 
             const insert = await query(
-                `INSERT into "UserInformation" (name, google_id, email, household_id, role) values ($1, $2, $3, NULL, $4) RETURNING *`, [name, googleId, email, role]
+                `INSERT into "UserInformation" (name, google_id, email, household_id, role) values ($1, $2, $3, NULL, $4) `, [name, googleId, email, role]
             )
 
             user = insert.rows[0]
@@ -349,41 +349,79 @@ app.delete('/households/:id', requireUser, (req, res) => {
     }
 })
 
-app.post('/households/join', requireUser, (req, res) => {
-    const {household_name} = req.body
-    try{
-        //check if household exists
-        const qs = `SELECT household_id FROM "Households" WHERE household_name =  $1`
-        query(qs, [household_name]).then(data => {
-            let householdID
+// app.post('/households/join', requireUser, (req, res) => {
+//     const {household_name} = req.body
+//     try{
+//         //check if household exists
+//         const qs = `SELECT household_id FROM "Households" WHERE household_name =  $1`
+//         query(qs, [household_name]).then(data => {
+//             let householdID
 
-            if (data.rows.length === 0){
-                const createQS = `INSERT into "Households" (household_name) VALUES ($1) RETURNING household_id`
-                query(createQS, [household_name]).then(data => {
-                    householdID = data.rows[0].household_id
+//             if (data.rows.length === 0){
+//                 const createQS = `INSERT into "Households" (household_name) VALUES ($1) RETURNING household_id`
+//                 query(createQS, [household_name]).then(data => {
+//                     householdID = data.rows[0].household_id
 
-                    const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
-                    query(updateQS, [householdID, req.user.id])
+//                     const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
+//                     query(updateQS, [householdID, req.user.id])
 
-                    res.json({joined: true, household_id: householdID})
-                })
-            }else{
-                //household already exists
-                householdID = data.rows[0].household_id
+//                     res.json({joined: true, household_id: householdID})
+//                 })
+//             }else{
+//                 //household already exists
+//                 householdID = data.rows[0].household_id
 
-                const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
+//                 const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
 
-                query(updateQS, [householdID, req.user.id])
+//                 query(updateQS, [householdID, req.user.id])
 
-                res.json({joined: true, household_id: householdID})
-            }
+//                 res.json({joined: true, household_id: householdID})
+//             }
 
-        })
-    } catch(err){
-        console.error(err)
-        res.status(500).json({error: "Server error joining household"})
+//         })
+//     } catch(err){
+//         console.error(err)
+//         res.status(500).json({error: "Server error joining household"})
+//     }
+// })
+
+app.post('/households/join', requireUser, async (req, res) => {
+  const { household_name } = req.body;
+
+  if (!household_name) {
+    return res.status(400).json({ error: "household_name is required" })
+  }
+
+  try {
+    // Check if household exists
+    const selectQS = `SELECT id FROM "Households" WHERE household_name = $1`
+    const selectResult = await query(selectQS, [household_name.trim()])
+
+    let householdID
+
+    if (selectResult.rows.length === 0) {
+      // Create new household
+      const insertQS = `INSERT INTO "Households" (household_name) VALUES ($1) RETURNING id`
+      const insertResult = await query(insertQS, [household_name.trim()])
+      householdID = insertResult.rows[0].id
+    } else {
+      // Household already exists
+      householdID = selectResult.rows[0].id
     }
+
+    // Update user's household_id
+    const updateQS = `UPDATE "UserInformation" SET household_id = $1 WHERE id = $2 RETURNING id, household_id`
+    await query(updateQS, [householdID, req.user.id])
+
+    // Respond with success
+    res.json({ joined: true, household_id: householdID })
+  } catch (err) {
+    console.error("Error in /households/join:", err)
+    res.status(500).json({ error: "Server error joining household" })
+  }
 })
+
+
 
 
 app.listen(app.get('port'), () => {

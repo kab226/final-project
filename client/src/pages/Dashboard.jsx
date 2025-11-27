@@ -174,7 +174,7 @@ function Dashboard(){
             </Modal> */}
             
             <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open:false})}>
-                <Alert severity = {snacckbar.severity} sx = {{ width: "100%"}}>{snackbar.message}</Alert>
+                <Alert severity = {snackbar.severity} sx = {{ width: "100%"}}>{snackbar.message}</Alert>
             </Snackbar>
         </div>
     )

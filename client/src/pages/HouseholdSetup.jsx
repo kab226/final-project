@@ -15,8 +15,8 @@ function HouseholdSetup(){
             try{
                 const res = await fetch("http://localhost:3000/households", {
                     headers:{
-                        "x-user": localStorage.getItem("x-user")
-                    }
+                        "x-user": localStorage.getItem("x-user")|| "",
+                    },
                 })
 
                 const data = await res.json()
