@@ -349,41 +349,6 @@ app.delete('/households/:id', requireUser, (req, res) => {
     }
 })
 
-// app.post('/households/join', requireUser, (req, res) => {
-//     const {household_name} = req.body
-//     try{
-//         //check if household exists
-//         const qs = `SELECT household_id FROM "Households" WHERE household_name =  $1`
-//         query(qs, [household_name]).then(data => {
-//             let householdID
-
-//             if (data.rows.length === 0){
-//                 const createQS = `INSERT into "Households" (household_name) VALUES ($1) RETURNING household_id`
-//                 query(createQS, [household_name]).then(data => {
-//                     householdID = data.rows[0].household_id
-
-//                     const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
-//                     query(updateQS, [householdID, req.user.id])
-
-//                     res.json({joined: true, household_id: householdID})
-//                 })
-//             }else{
-//                 //household already exists
-//                 householdID = data.rows[0].household_id
-
-//                 const updateQS = `UPDATE "UserInformation" set household_id = $1 WHERE id = $2`
-
-//                 query(updateQS, [householdID, req.user.id])
-
-//                 res.json({joined: true, household_id: householdID})
-//             }
-
-//         })
-//     } catch(err){
-//         console.error(err)
-//         res.status(500).json({error: "Server error joining household"})
-//     }
-// })
 
 app.post('/households/join', requireUser, async (req, res) => {
   const { household_name } = req.body;
