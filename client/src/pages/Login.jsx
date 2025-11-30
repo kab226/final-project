@@ -24,8 +24,6 @@ function Login(){
 
             const data = await res.json()
 
-            //stores the JWT
-            
             localStorage.setItem("x-user", data.email)
             localStorage.setItem("role", data.role)
 
@@ -46,7 +44,9 @@ function Login(){
                 gap: "20px"
             }}
         >
-            <h1>Sign in with Google</h1>
+            <img src = "./src/TextLogo.png"></img>
+            <h1 style={{marginBottom: 2}}>Welcome to Meal Mate!</h1>
+            <h2 style = {{marginTop: 2}}>Please login with Google</h2>
 
             <GoogleLogin onSuccess={handleSuccess}
             //The following is Josh's code - I made a function to handle some more of the backend stuff
