@@ -4,6 +4,7 @@ import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import {Grid, Card, CardContent, CardMedia, Typography, TextField, Button, Modal, Snackbar, Alert} from "@mui/material"
 import {extractIngredients} from '../components/ExtractIngredients'
+import CreateRecipeModal from '../components/CreateRecipeModal'
 
 
 function Dashboard(){
@@ -18,6 +19,7 @@ function Dashboard(){
     const [selectedRecipe, setSelectedRecipe] = useState(null)
     const [selectedDate, setSelectedDate] = useState(null)
     const [customNotes, setCustomNotes] = useState("")
+    const [createRecipeModalOpen, setCreateRecipeModalOpen] = useState(false)
     
 
 
@@ -37,13 +39,19 @@ function Dashboard(){
     useEffect(() => {loadWeekRecipes()}, [])
 
     //load saved recipes
+    const loadSavedRecipes = async () => {
+        try {
+            const res = await fetch("http://localhost:3000/saved-recipes", {
+                headers: {"x-user": localStorage.getItem("x-user")}
+            })
+            const data = await res.json()
+            setSavedRecipes(data)
+        } catch (err) {
+            console.error("Failed to load saved recipes", err)
+        }
+    }
 
-    useEffect(() => {
-        fetch("http://localhost:3000/saved-recipes", {
-            headers: {"x-user": localStorage.getItem("x-user")}
-        }).then(res => res.json()).then(data => setSavedRecipes(data))
-    }, [])
-
+    useEffect(() => {loadSavedRecipes()}, [])
 
     //load MealDB recipes via. search
     useEffect(() => {
@@ -116,7 +124,9 @@ function Dashboard(){
         setCustomNotes("")
     }
 
-
+    const handleModalOpen= () =>{
+        setCreateRecipeModalOpen(true)
+    }
 
     return(
         <div style = {{padding: "20px"}}>
@@ -131,6 +141,10 @@ function Dashboard(){
             <TextField label = "Search Recipes" fullWidth value = {searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{marginBottom: 3, marginTop: 3}}/>
             
             <Typography variant = "h5" sx = {{marginBottom: 2}}>Saved Recipes</Typography>
+            <Button variant="contained" color="primary" onClick={() => 
+                setCreateRecipeModalOpen(true)}
+            >Add New Recipe
+            </Button>
 
             <Grid container spacing = {2}>
                 {savedRecipes.map((r) => (
@@ -178,7 +192,12 @@ function Dashboard(){
             <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open:false})}>
                 <Alert severity = {snackbar.severity} sx = {{ width: "100%"}}>{snackbar.message}</Alert>
             </Snackbar>
+            <CreateRecipeModal createRecipeModalOpen = {createRecipeModalOpen} 
+                setCreateRecipeModalOpen = {setCreateRecipeModalOpen}
+                refreshSavedRecipes = {loadSavedRecipes} />
         </div>
+
+        
     )
 }
 
