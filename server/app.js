@@ -275,8 +275,9 @@ app.get('/week-recipes', requireUser, (req, res) =>{
 //adds a new recipe to database
 app.post('/week-recipes', requireUser, (req, res) => {
     try {
+        const householdId = req.user.household_id
         let body = req.body
-        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${body.household_id})`
+        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${householdId})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
