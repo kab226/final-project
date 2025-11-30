@@ -109,6 +109,40 @@ function Dashboard(){
         }
     }
 
+    //Save Recipe from mealdb
+    const saveRecipe = async (meal) => {
+    try {
+        // Extract ingredients if it's from MealDB
+        const ingredients = extractIngredients(meal)
+
+        const newRecipe = {
+            recipe: meal.strMeal,
+            ingredients: JSON.stringify(ingredients),
+            notes: ""
+        }
+
+        const res = await fetch("http://localhost:3000/saved-recipes", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-user": localStorage.getItem("x-user")
+            },
+            body: JSON.stringify(newRecipe)
+        })
+
+        if (!res.ok) throw new Error(`HTTP error! status ${res.status}`)
+
+        setSnackbar({ open: true, message: "Recipe saved!", severity: "success" })
+
+        // Refresh saved recipes to re-render
+        loadSavedRecipes()
+    } catch (err) {
+        console.error("Failed to save recipe", err)
+        setSnackbar({ open: true, message: "Failed to save recipe", severity: "error" })
+    }
+    }
+
+
 
     //FullCalendar Day Click
     const handleDateClick = (info) => {
@@ -177,7 +211,11 @@ function Dashboard(){
 
                                 <Button onClick = {() => addToCalendar(meal, prompt("What day? (YYYY-MM-DD)"))}>
                                     Add to Week
-                                </Button>                                
+                                </Button>   
+                                
+                                <Button onClick = {() => saveRecipe(meal)}>
+                                    Save Recipe
+                                </Button>                               
                             </CardContent>
                         </Card>
                     </Grid>
