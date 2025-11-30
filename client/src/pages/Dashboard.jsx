@@ -3,7 +3,7 @@ import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import {Grid, Card, CardContent, CardMedia, Typography, TextField, Button, Modal, Snackbar, Alert} from "@mui/material"
-import {extractIngredients} from './functions/ExtractIngredients'
+import {extractIngredients} from '../components/ExtractIngredients'
 
 
 function Dashboard(){
