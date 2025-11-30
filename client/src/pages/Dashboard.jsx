@@ -3,6 +3,7 @@ import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
 import {Grid, Card, CardContent, CardMedia, Typography, TextField, Button, Modal, Snackbar, Alert} from "@mui/material"
+import {extractIngredients} from './functions/ExtractIngredients'
 
 
 function Dashboard(){
@@ -76,17 +77,18 @@ function Dashboard(){
             setSnackbar({open: true, message: "Failed to move meal", severity: "error"})
         }
     }
-
+    
     //add recipe to calendar
     const addToCalendar = async(recipe, day) => {
         try{
+            const ingredients = recipe.idMeal ? extractIngredients(recipe) : recipe.ingrdients
         await fetch("http://localhost:3000/week-recipes", {
             method: "POST", 
             headers: {"Content-Type": "application/json",
                 "x-user": localStorage.getItem("x-user")},
             body: JSON.stringify({
                 recipe: recipe.strMeal || recipe.recipe,
-                ingredients: JSON.stringify(recipe.ingredients || []),
+                ingredients: JSON.stringify(ingredients),
                 day
             })
         })
@@ -157,9 +159,9 @@ function Dashboard(){
                         <Card draggable onDragStart = {(e) => e.dataTransfer.setData("recipe", JSON.stringify(meal))}>
                             <CardMedia component = "img" height = "180" image = {meal.strMealThumb}/>
                             <CardContent>
-                                <Typography cariant = "h6">{meal.strMeal}</Typography>
+                                <Typography variant = "h6">{meal.strMeal}</Typography>
 
-                                <Button onClick = {() => addToCalendar(r, prompt("What day? (YYYY-MM-DD)"))}>
+                                <Button onClick = {() => addToCalendar(meal, prompt("What day? (YYYY-MM-DD)"))}>
                                     Add to Week
                                 </Button>                                
                             </CardContent>
