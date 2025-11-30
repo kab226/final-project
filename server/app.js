@@ -185,8 +185,9 @@ app.get('/saved-recipes', requireUser, (req, res) =>{
 //adds a new recipe to database
 app.post('/saved-recipes',requireUser, (req, res) => {
     try {
+        let id = req.user.id
         let body = req.body
-        let qs =`INSERT into "SavedRecipes" (recipe, ingredients, notes, saved_by) values ('${body.recipe}', '${body.ingredients}', '${body.notes}', ${body.saved_by})`
+        let qs =`INSERT into "SavedRecipes" (recipe, ingredients, notes, saved_by) values ('${body.recipe}', '${body.ingredients}', '${body.notes}', ${id})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -275,8 +276,9 @@ app.get('/week-recipes', requireUser, (req, res) =>{
 //adds a new recipe to database
 app.post('/week-recipes', requireUser, (req, res) => {
     try {
+        const householdId = req.user.household_id
         let body = req.body
-        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${body.household_id})`
+        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${householdId})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
