@@ -99,13 +99,28 @@ function Dashboard(){
                     ingredients: JSON.stringify(ingredients),
                     day
                 })
-        })
+            })
 
         await loadWeekRecipes()
         setSnackbar({open: true, message: "Meal added to calendar!", severity: "success"})
         }catch(err){
             console.error(err)
             setSnackbar({open: true, message: "Failed to add meal", severity: "error"})
+        }
+    }
+//make this admin only
+    const removeMeal = async(meal_id) => {
+        try{
+            await fetch(`http://localhost:3000/week-recipes/${meal_id}`, {
+                method: "DELETE", 
+                headers: {"Content-Type": "application/json",
+                    "x-user": localStorage.getItem("x-user")},
+            })
+            await loadWeekRecipes()
+            setSnackbar({open: true, message: "Meal removed from calendar!", severity: "success"})
+        }catch(err){
+            console.error(err)
+            setSnackbar({open: true, message: "Failed to remove meal", severity: "error"})
         }
     }
 
@@ -136,12 +151,11 @@ function Dashboard(){
 
         // Refresh saved recipes to re-render
         loadSavedRecipes()
-    } catch (err) {
+    }catch (err){
         console.error("Failed to save recipe", err)
         setSnackbar({ open: true, message: "Failed to save recipe", severity: "error" })
     }
     }
-
 
 
     //FullCalendar Day Click

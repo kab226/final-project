@@ -237,19 +237,20 @@ app.post('/users', requireAdmin, (req, res) => {
         res.send('error', err)
     }
 })
-//updates an entry in the database based on the req body
-app.put('/users/:id', requireAdmin, (req,res) => {
+//updates a role in the database based on the req body
+app.put('/users/:id', requireUser, requireAdmin, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE "UserInformation" SET name = '${body.name}', google_id = '${body.google_id}', email= '${body.email}', household_id = ${body.household_id}, role = '${body.role}' where id = ${id}`
+        let qs = `UPDATE "UserInformation" SET role = '${body.role}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
     }
 })
+
 //deletes an entry based on the id
-app.delete('/users/:id', requireAdmin, (req, res) => {
+app.delete('/users/:id', requireUser, requireAdmin, (req, res) => {
     try{
         const id = req.params.id
         const qs = `DELETE from "UserInformation" where id = ${id}`
@@ -381,7 +382,7 @@ app.post('/households/join', requireUser, async (req, res) => {
     }
 
     // Update user's household_id
-    const updateQS = `UPDATE "UserInformation" SET household_id = $1 WHERE id = $2 RETURNING id, household_id`
+    const updateQS = `UPDATE "UserInformation" SET household_id = $1, role = 'user' WHERE id = $2 RETURNING id, household_id`
     await query(updateQS, [householdID, userId])
 
     if (isNew) {
@@ -400,10 +401,6 @@ app.post('/households/join', requireUser, async (req, res) => {
 //Admin routes
 app.get('/household/users', requireUser, async (req, res) => {
   try {
-    // check if admin
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Not authorized' })
-    }
 
     const householdID = req.user.household_id;
 
