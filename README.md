@@ -13,6 +13,33 @@ Role: Frontend developer
 
 
 ## Application Features
+ * Users Accounts and Roles
+ ** can sign in and join households
+ ** the admin of the household is able to view all users in their household and remove users
+
+ * Databases
+ ** Stores User Information and Tracks Meals
+ ** Retrieves Recipes
+
+ * Interactive UI
+ ** Users login/register form for users and households
+ ** Users are able to click and drag recipes once it's been added to the calendar
+ ** Users are able to save from theMealdb and add their own
+ ** Users can add recipes to the week
+ 
+ * New Library/Framework
+ ** FullCalendar
+
+ * Internal REST API
+ ** GroceryList
+ ** Households
+ ** SavedRecipes
+ ** UserInformation
+ ** WeekRecipes
+
+ * Extrnal REST API
+ ** MealDB - holds recipes and ingredients
+
 
 ## Installation & Setup Instructions (How to install, run, and configure the application)
 
