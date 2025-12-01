@@ -20,6 +20,9 @@ function Dashboard(){
     const [selectedDate, setSelectedDate] = useState(null)
     const [customNotes, setCustomNotes] = useState("")
     const [createRecipeModalOpen, setCreateRecipeModalOpen] = useState(false)
+
+    const currentUserRole = localStorage.getItem("role")
+    const isAdmin = currentUserRole === "admin"
     
 
 
@@ -99,13 +102,28 @@ function Dashboard(){
                     ingredients: JSON.stringify(ingredients),
                     day
                 })
-        })
+            })
 
         await loadWeekRecipes()
         setSnackbar({open: true, message: "Meal added to calendar!", severity: "success"})
         }catch(err){
             console.error(err)
             setSnackbar({open: true, message: "Failed to add meal", severity: "error"})
+        }
+    }
+//make this admin only
+    const removeMeal = async(meal_id) => {
+        try{
+            await fetch(`http://localhost:3000/week-recipes/${meal_id}`, {
+                method: "DELETE", 
+                headers: {"Content-Type": "application/json",
+                    "x-user": localStorage.getItem("x-user")},
+            })
+            await loadWeekRecipes()
+            setSnackbar({open: true, message: "Meal removed from calendar!", severity: "success"})
+        }catch(err){
+            console.error(err)
+            setSnackbar({open: true, message: "Failed to remove meal", severity: "error"})
         }
     }
 
@@ -136,12 +154,11 @@ function Dashboard(){
 
         // Refresh saved recipes to re-render
         loadSavedRecipes()
-    } catch (err) {
+    }catch (err){
         console.error("Failed to save recipe", err)
         setSnackbar({ open: true, message: "Failed to save recipe", severity: "error" })
     }
     }
-
 
 
     //FullCalendar Day Click
@@ -169,6 +186,39 @@ function Dashboard(){
             <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
             initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} editable = {true}
             droppable = {true} height = "auto"   displayEventTime={false}/>
+            <Typography variant="h5" sx={{ marginTop: 3 }}>This Week's Meals</Typography>
+            <Grid container spacing={2}>
+                {weekRecipes
+                //gets only the meals from this week
+                .filter((meal) => {
+                    const mealDate = new Date(meal.date)
+                    const today = new Date()
+                    const day = today.getDay()
+                    const diffToSunday = -day
+                    const sunday = new Date(today)
+                    sunday.setDate(today.getDate() + diffToSunday)
+                    sunday.setHours(0,0,0,0)
+
+                    return mealDate >= sunday
+                })
+                .map((meal) => (
+                    <Grid item xs={12} sm={6} md={4} key={meal.id}>
+                        <Card>
+                            <CardContent>
+                                <Typography variant="h6">{meal.title}</Typography>
+                                <Typography>Date: {new Date(meal.date).toLocaleDateString()}</Typography>
+                                {/* renders only if isAdmin */}
+                                {isAdmin && (
+                                    <Button variant="contained" color="error" sx={{ marginTop: 1 }} onClick={() => removeMeal(meal.id)}>
+                                        Remove Meal
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+
 
             <br/><br/>
 
