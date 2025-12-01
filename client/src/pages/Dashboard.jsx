@@ -179,12 +179,40 @@ function Dashboard(){
         setCreateRecipeModalOpen(true)
     }
 
+    const removeFromCalendar = async(eventId) => {
+        if (!window.confirm("Are you sure you want to remove this meal from the calendar?")) {
+            return;
+        }
+
+        try{
+            await fetch(`http://localhost:3000/week-recipes/${eventId}`, {
+                method: "DELETE",
+                headers: {
+                    "x-user": localStorage.getItem("x-user")
+                },
+            })
+
+            
+            await loadWeekRecipes()
+            setSnackbar({open: true, message: "Meal removed from calendar!", severity: "success"})
+        }catch(err){
+            console.error(err)
+            setSnackbar({open: true, message: "Failed to remove meal", severity: "error"})
+        }
+    }
+
+    const handleEventClick = (info) => {
+        
+        const eventId = info.event.id;
+        removeFromCalendar(eventId);
+    }
+
     return(
         <div style = {{padding: "20px"}}>
             <h1>Your Weekly Meal Plan</h1>
 
             <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
-            initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} editable = {true}
+            initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} eventClick = {handleEventClick} editable = {true}
             droppable = {true} height = "auto"   displayEventTime={false}/>
             <Typography variant="h5" sx={{ marginTop: 3 }}>This Week's Meals</Typography>
             <Grid container spacing={2}>
