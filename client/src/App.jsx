@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dashboard"
 import ProtectedRoute from './components/ProtectedRoute'
 import GroceryList from './pages/GroceryList'
 import HouseholdSetup from './pages/HouseholdSetup'
+import HouseholdAdminPage from './pages/Admin'
 
 import MealMateLogo from './FullLogo.png'
 
@@ -18,6 +19,7 @@ const NavHeader = () => {
           <Link to = "/dashboard" className = "nav-link">Dashboard</Link>
           <Link to = "/grocery-list" className = "nav-link">Grocery List</Link>
           <Link to="/household" className = "nav-link">Change Household</Link>
+          <Link to="/household-admin" className = "nav-link">Admin Page</Link>
         </nav>
     </header>
   )
@@ -46,6 +48,7 @@ function App() {
             <Route path = "/household" element = {<HouseholdSetup/>}/>
             <Route path = "/dashboard" element = {<Dashboard/>}/>
             <Route path = "/grocery-list" element = {<GroceryList/>}/>
+            <Route path = "/household-admin" element = {<HouseholdAdminPage/>}/>
         </Route>
       </Routes>
     </Router>
