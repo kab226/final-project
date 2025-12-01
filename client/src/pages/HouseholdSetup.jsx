@@ -65,11 +65,11 @@ function HouseholdSetup(){
 
             setStatus("Joined household successfully!")
             setTimeout(()=> {
-                if (data.is_admin || data.role === 'admin'){
+                // if (data.is_admin || data.role === 'admin'){
                     navigate("/household-admin")
-                }else{
-                    navigate("/dashboard")
-                }
+                // }else{
+                //     navigate("/dashboard")
+                // }
             }, 1200)
         } catch(err){
             console.error(err)
