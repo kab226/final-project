@@ -20,6 +20,9 @@ function Dashboard(){
     const [selectedDate, setSelectedDate] = useState(null)
     const [customNotes, setCustomNotes] = useState("")
     const [createRecipeModalOpen, setCreateRecipeModalOpen] = useState(false)
+
+    const currentUserRole = localStorage.getItem("role")
+    const isAdmin = currentUserRole === "admin"
     
 
 
@@ -183,6 +186,39 @@ function Dashboard(){
             <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
             initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} editable = {true}
             droppable = {true} height = "auto"   displayEventTime={false}/>
+            <Typography variant="h5" sx={{ marginTop: 3 }}>This Week's Meals</Typography>
+            <Grid container spacing={2}>
+                {weekRecipes
+                //gets only the meals from this week
+                .filter((meal) => {
+                    const mealDate = new Date(meal.date)
+                    const today = new Date()
+                    const day = today.getDay()
+                    const diffToSunday = -day
+                    const sunday = new Date(today)
+                    sunday.setDate(today.getDate() + diffToSunday)
+                    sunday.setHours(0,0,0,0)
+
+                    return mealDate >= sunday
+                })
+                .map((meal) => (
+                    <Grid item xs={12} sm={6} md={4} key={meal.id}>
+                        <Card>
+                            <CardContent>
+                                <Typography variant="h6">{meal.title}</Typography>
+                                <Typography>Date: {new Date(meal.date).toLocaleDateString()}</Typography>
+                                {/* renders only if isAdmin */}
+                                {isAdmin && (
+                                    <Button variant="contained" color="error" sx={{ marginTop: 1 }} onClick={() => removeMeal(meal.id)}>
+                                        Remove Meal
+                                    </Button>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
+
 
             <br/><br/>
 
