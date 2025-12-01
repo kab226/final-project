@@ -59,8 +59,18 @@ function HouseholdSetup(){
                 return
             }
 
+            localStorage.setItem("household_id", data.household_id)
+
+            localStorage.setItem('role', data.role)
+
             setStatus("Joined household successfully!")
-            setTimeout(()=> navigate("/dashboard"), 1200)
+            setTimeout(()=> {
+                if (data.is_admin || data.role === 'admin'){
+                    navigate("/household-admin")
+                }else{
+                    navigate("/dashboard")
+                }
+            }, 1200)
         } catch(err){
             console.error(err)
             setStatus("Server error joining household.")

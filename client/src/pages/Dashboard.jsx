@@ -89,16 +89,16 @@ function Dashboard(){
     //add recipe to calendar
     const addToCalendar = async(recipe, day) => {
         try{
-            const ingredients = recipe.idMeal ? extractIngredients(recipe) : recipe.ingrdients
-        await fetch("http://localhost:3000/week-recipes", {
-            method: "POST", 
-            headers: {"Content-Type": "application/json",
-                "x-user": localStorage.getItem("x-user")},
-            body: JSON.stringify({
-                recipe: recipe.strMeal || recipe.recipe,
-                ingredients: JSON.stringify(ingredients),
-                day
-            })
+            const ingredients = recipe.idMeal ? extractIngredients(recipe) : recipe.ingredients
+            await fetch("http://localhost:3000/week-recipes", {
+                method: "POST", 
+                headers: {"Content-Type": "application/json",
+                    "x-user": localStorage.getItem("x-user")},
+                body: JSON.stringify({
+                    recipe: recipe.strMeal || recipe.recipe,
+                    ingredients: JSON.stringify(ingredients),
+                    day
+                })
         })
 
         await loadWeekRecipes()
@@ -168,7 +168,7 @@ function Dashboard(){
 
             <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
             initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} editable = {true}
-            droppable = {true} height = "auto"/>
+            droppable = {true} height = "auto"   displayEventTime={false}/>
 
             <br/><br/>
 
