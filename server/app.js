@@ -278,7 +278,8 @@ app.post('/week-recipes', requireUser, (req, res) => {
     try {
         const householdId = req.user.household_id
         let body = req.body
-        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${body.ingredients}', '${body.day}', ${householdId})`
+        let ingredients = JSON.stringify(body.ingredients)
+        let qs =`INSERT into "WeekRecipes" (recipe, ingredients, day, household_id) values ('${body.recipe}', '${ingredients}', '${body.day}', ${householdId})`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     } catch (error) {
         res.send('error', err)
@@ -353,7 +354,8 @@ app.delete('/households/:id', requireUser, (req, res) => {
 
 
 app.post('/households/join', requireUser, async (req, res) => {
-  const { household_name } = req.body;
+  const { household_name } = req.body
+  const userId = req.user.id
 
   if (!household_name) {
     return res.status(400).json({ error: "household_name is required" })
@@ -365,12 +367,14 @@ app.post('/households/join', requireUser, async (req, res) => {
     const selectResult = await query(selectQS, [household_name.trim()])
 
     let householdID
+    let isNew = false
 
     if (selectResult.rows.length === 0) {
       // Create new household
       const insertQS = `INSERT INTO "Households" (household_name) VALUES ($1) RETURNING id`
       const insertResult = await query(insertQS, [household_name.trim()])
       householdID = insertResult.rows[0].id
+      isNew = true
     } else {
       // Household already exists
       householdID = selectResult.rows[0].id
@@ -378,15 +382,62 @@ app.post('/households/join', requireUser, async (req, res) => {
 
     // Update user's household_id
     const updateQS = `UPDATE "UserInformation" SET household_id = $1 WHERE id = $2 RETURNING id, household_id`
-    await query(updateQS, [householdID, req.user.id])
+    await query(updateQS, [householdID, userId])
+
+    if (isNew) {
+        const userQS = `UPDATE "UserInformation" SET role = 'admin' WHERE id = $1 RETURNING id, role`
+        await query(userQS, [userId])
+    }
 
     // Respond with success
-    res.json({ joined: true, household_id: householdID })
+    res.json({ joined: true, household_id: householdID, is_admin: isNew, role: req.user.role})
   } catch (err) {
     console.error("Error in /households/join:", err)
     res.status(500).json({ error: "Server error joining household" })
   }
 })
+
+//Admin routes
+app.get('/household/users', requireUser, async (req, res) => {
+  try {
+    // check if admin
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized' })
+    }
+
+    const householdID = req.user.household_id;
+
+    const qs = `SELECT id, name, email, role FROM "UserInformation" WHERE household_id = $1`
+    const data = await query(qs, [householdID]);
+
+    res.json(data.rows)
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: "Server error fetching users" })
+  }
+})
+
+app.delete('/household/users/:id', requireUser, async (req, res) => {
+  try {
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ error: 'Not authorized' })
+    }
+
+    const userToRemove = req.params.id
+    const householdID = req.user.household_id
+
+    // Ensure you're removing from same household
+    const qs =       `DELETE FROM "UserInformation" WHERE id = $1 AND household_id = $2`
+    await query(qs, [userToRemove, householdID])
+
+    res.json({ success: true })
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Error removing user" })
+  }
+})
+
+
 
 
 
