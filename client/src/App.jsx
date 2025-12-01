@@ -29,7 +29,7 @@ const NavHeader = () => {
 const ProtectedLayout = () => {
   return(
     <ProtectedRoute>
-      <NavHeader />
+      
       <div className="content">
         <Outlet/>
       </div>
@@ -40,6 +40,7 @@ const ProtectedLayout = () => {
 function App() {
   return (
     <Router>
+      <NavHeader />
       <Routes>
         <Route path = "/" element = {<Login />} />
 
