@@ -14,8 +14,8 @@ Role: Frontend developer
 
 ## Application Features
  * Users Accounts and Roles
- * * can sign in and join households
- * the admin of the household is able to view all users in their household and remove users
+  * can sign in and join households
+  * the admin of the household is able to view all users in their household and remove users
 
  * Databases
  ** Stores User Information and Tracks Meals
