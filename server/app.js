@@ -266,7 +266,7 @@ app.delete('/users/:id', requireUser, requireAdmin, (req, res) => {
 app.get('/week-recipes', requireUser, (req, res) =>{
     try{
         const householdID = req.user.household_id
-        const qs = `SELECT * from "WeekRecipes" where household_id = ${householdID}`
+        const qs = `SELECT * from "WeekRecipes" where household_id = ${householdID} ORDER BY day ASC`
         query(qs).then(data => {res.json(data.rows)})
 
     }catch(err){

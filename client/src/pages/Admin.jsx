@@ -2,12 +2,10 @@ import { useState, useEffect } from "react"
 import { Typography, Grid, Card, CardContent, Button, Snackbar, Alert } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 
-//make it so users can view but not make changes
 //if admin make it so they can remove recipes from the week?
 function HouseholdAdminPage() {
     const [users, setUsers] = useState([])
     const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" })
-    const [role, setRole] = useState("user")
     const navigate = useNavigate()
 
     const currentUser = localStorage.getItem("x-user")
