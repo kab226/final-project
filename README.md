@@ -42,6 +42,35 @@ Role: Frontend developer
 
 
 ## Installation & Setup Instructions (How to install, run, and configure the application)
+#### Client
+The client for this project uses React + Vite template which provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+
+You must have node.js running on your machine. Once you have cloned this project you can run `npm install` to install all the packages for this project. Then running `npm run dev` will run the dev version of this code, which will run this project on localhost:5173 (or at the location specified in the console).
+ * react-router-dom
+ * react-dom
+ * react
+ * jwt-decode
+ * he
+ * @react-oauth/google
+ * @mui/material
+ * @mui/icons-material
+ * @fullcalendar/react
+ * @fullcalendar/interaction
+ * @fullcalendar/daygrid
+ * @fullcalendar/core
+ * @emotion/styled
+ * @emotion/react
+
+#### Server
+You must have node.js running on your machine. Once you have cloned this project you can run `npm install` to install all the packages for this project. Then running `npm run dev` will run the dev version of this code, which will run this project with nodemon. Nodemon auto-restarts the node server every time you make a change to a file. This is very helpful when you are writing and testing code.
+ *  @react-oath/google
+ *  cors
+ *  dotenv
+ *  express
+ *  google-auth-library
+ *  jswebtoken
+ *  nodemon
+ *  pg
 
 ## API Keys & Database Setup (What environment variables or external configurations are needed)
-
+* 
