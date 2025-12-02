@@ -9,7 +9,7 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 400,
-  bgcolor: 'gray',
+  bgcolor: 'white',
   border: '2px solid #000',
   boxShadow: 24,
   p: 4
@@ -96,7 +96,7 @@ export default function CreateRecipeModal({createRecipeModalOpen, setCreateRecip
                 </Stack>
             ))}
 
-            <Button startIcon={<Add />} onClick={addIngredientField}>
+            <Button sx= {{color: '#f77f00'}} startIcon={<Add />} onClick={addIngredientField}>
                 Add Ingredient
             </Button>
 
@@ -104,8 +104,8 @@ export default function CreateRecipeModal({createRecipeModalOpen, setCreateRecip
                   setNotes(event.target.value)}/>
 
             </Stack>
-            <Button onClick = {addRecipe}>Add Recipe</Button>
-            <Button onClick = {handleModalClose}>Close</Button>
+            <Button onClick = {addRecipe} sx= {{color: '#f77f00'}}>Add Recipe</Button>
+            <Button onClick = {handleModalClose} sx= {{color: '#d62828'}}>Close</Button>
           </Box>
         </Modal>
     )

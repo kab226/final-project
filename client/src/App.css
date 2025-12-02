@@ -1,8 +1,14 @@
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.content{
   padding: 2rem;
-  text-align: center;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .logo {
@@ -33,14 +39,3 @@
   }
 }
 
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-body {
-  background-color:rgb(56, 56, 56)
-}
