@@ -22,6 +22,7 @@ const NavHeader = () => {
           <Link to = "/grocery-list" className = "nav-link">Grocery List</Link>
           <Link to="/household" className = "nav-link">Change Household</Link>
           <Link to="/household-admin" className = "nav-link">Admin</Link>
+          <Link to="/household-admin" className = "nav-link">View Household</Link>
         </nav>
     </header>
   )
