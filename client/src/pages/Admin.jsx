@@ -75,7 +75,6 @@ function HouseholdAdminPage() {
                 },
                 body: JSON.stringify({role: newRole}),
             })
-
             if (!res.ok) throw new Error("Failed to change user role")
 
             setSnackbar({ open: true, message: "User role changed successfully", severity: "success" })
