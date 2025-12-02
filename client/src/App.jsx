@@ -13,12 +13,15 @@ import MealMateLogo from './FullLogo.png'
 //page header 
 const NavHeader = () => {
   return(
-    <header className = "site-header">
-        <img src={MealMateLogo} alt = "MealMate Logo" className = "app-logo" />
+    <header>
+        <div style={{display: 'flex', alignItems: 'center'}}>
+          <img src={MealMateLogo} alt = "MealMate Logo" className = "app-logo" />
+        </div>
         <nav className = "header-nav">
           <Link to = "/dashboard" className = "nav-link">Dashboard</Link>
           <Link to = "/grocery-list" className = "nav-link">Grocery List</Link>
           <Link to="/household" className = "nav-link">Change Household</Link>
+          <Link to="/household-admin" className = "nav-link">Admin</Link>
           <Link to="/household-admin" className = "nav-link">View Household</Link>
         </nav>
     </header>
@@ -29,7 +32,6 @@ const NavHeader = () => {
 const ProtectedLayout = () => {
   return(
     <ProtectedRoute>
-      
       <div className="content">
         <Outlet/>
       </div>
