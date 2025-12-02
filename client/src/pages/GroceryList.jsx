@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
-import {Box, Typography, Paper, TextField, Button, IconButton, List, ListItem, ListItemText, Divider} from "@mui/material"
+import {Box, Typography, Paper, TextField, Button, IconButton, List, ListItem, ListItemText, Divider, Container, Grid} from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
 import EditIcon from "@mui/icons-material/Edit"
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart"
+import AddIcon from "@mui/icons-material/Add"
+
 function GroceryList(){
     const [items, setItems] = useState([])
     const [custom, setCustom] = useState([])
@@ -121,63 +124,102 @@ function GroceryList(){
     }
 
     return(
-        <Box sx={{maxWidth: 650, mx: "auto", mt:4}}>
-            <Typography variant = "h4" gutterBottom>
-                GroceryList
-            </Typography>
+        <Container maxWidth="md" sx = {{mt: 5, mb: 10}}>
+            <Box sx={{display: 'flex', alignItems: 'center', mb: 4}}>
+                <Typography variant = "h4" fontWeight="bold">
+                    Grocery List
+                </Typography>
+            </Box>
 
-            <Typography variant="h6" sx={{mt: 3}}>
-                Ingredients From Weekly Meals
-            </Typography>
+            <Grid container spacing = {4}>
+                {/*Weekly Ingredients */}
+                <Grid item xs = {12} md = {6}>
+                    <Typography variant = "h6" sx = {{mb: 2, display: 'flex', alignItems: 'center', gap: 1}}>
+                        <ShoppingCartIcon color = "primary"/> From Weekly Meals
+                    </Typography>
+                    <Paper elevation = {2} sx = {{borderRadius: 2}}>
+                        {items.length === 0? (
+                            <Box sx = {{p: 3, textAlign: 'center', color: 'text.secondary'}}>
+                                No meals scheduled for this week.
+                            </Box>
+                        ) : (
+                            <List sx = {{maxHeight: 600, overflow: 'auto'}}>
+                                {items.map((i, index)=> (
+                                    <React.Fragment key = {index}>
+                                        <ListItem>
+                                            <ListItemText primary={<Typography fontWeight = "500">{i.ingredient}</Typography>}
+                                            secondary = {`${i.amount} - ${i.recipe}`}/>
+                                        </ListItem>
+                                        {index < items.length - 1 && <Divider component = "li" />}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        )}
+                    </Paper>
+                </Grid>
+                {/*Custom Items */}
+                <Grid item xs = {12} md = {6}>
+                    <Typography variant = "h6" sx = {{mb: 2}}>
+                        Custom Items
+                    </Typography>
+                    <Paper elevation = {2} sx = {{p: 3, mb: 3, borderRadius: 2}}>
+                        <form onSubmit={handleSubmit}>
+                            <Grid container spacing={2}>
+                                <Grid item xs = {8}>
+                                    <TextField name ="ingredient" label = "Ingredient" size = "small" value = {form.ingredient} onChange={handleChange} fullWidth required/>
+                                </Grid>
+                                <Grid item xs = {4}>
+                                    <TextField name ="amount" label = "Amount" size = "small" value = {form.amount} onChange={handleChange} fullWidth/>
+                                </Grid>
+                                <Grid item xs = {12}>
+                                    <TextField name ="recipe" label = "For Recipe (Optional)" size = "small" value = {form.recipe} onChange={handleChange} fullWidth/>
+                                </Grid>
+                                <Grid item xs = {12}>
+                                    <Button variant = "contained" type = "submit" fullWidth startIcon= {!editingID && <AddIcon />}>
+                                        {editingID? "Update Item" : "Add Item"}
+                                    </Button>
+                                    {editingID && (
+                                        <Button size = "small" fullWidth onClick={() => {setEditingId(null), setForm({ingredient:"", amount:"", recipe: ""})}} sx = {{mt:1}}>
+                                            Cancel
+                                        </Button>
+                                    )}
+                                </Grid>
+                            </Grid>
+                        </form>
+                    </Paper>
+                    <Paper elevation = {2} sx = {{borderRadius: 2}}>
+                        {custom.length === 0? (
+                            <Box sx = {{p: 3, textAlign: 'center', color: 'text.secondary'}}>
+                                No custom items added
+                            </Box>
+                        ) : (
+                            <List>
+                                {custom.map((item, index)=> (
+                                    <React.Fragment key = {item.id}>
+                                        <ListItem secondaryAction = {<Box>
+                                            <IconButton edge = "end" aria-label="edit" onClick={() => edit(item)} sx = {{mr: 1}}>
+                                                <EditIcon fontSize = "small"/>
+                                            </IconButton>
+                                            <IconButton edge = "end" aria-label="delete" onClick={() => deleteItem(item.id)}>
+                                                <DeleteIcon fontSize = "small"/>
+                                            </IconButton>
+                                        </Box>
+                                        }>
+                                            <ListItemText primary={<Typography fontWeight = "500">{item.ingredient}</Typography>}
+                                            secondary = {`${item.amount} - ${item.recipe}`}/>
+                                        </ListItem>
+                                        {index < custom.length - 1 && <Divider variant="inset" component="li" />}
+                                    </React.Fragment>
+                                ))}
+                            </List>
+                        )}
+                    </Paper>
 
-            <Paper sx = {{ mt:1}}>
-                <List>
-                    {items.map((i, index) => (
-                        <React.Fragment key = {index}>
-                            <ListItem>
-                                <ListItemText primary={`${i.ingredient} (${i.amount})`} secondary = {`From: ${i.recipe}`}/>
-                            </ListItem>
-                            <Divider />
-                        </React.Fragment>
-                    ))}
-                </List>
-            </Paper>
+                </Grid>
 
-            <Typography variant="h6" sx={{mt: 3}}>
-                Your Custom Items
-            </Typography>
-
-            <Paper sx = {{ p: 2, mb: 3}}>
-                <form onSubmit={handleSubmit}>
-                    <TextField name ="ingredient" label = "Ingredient" value = {form.ingredient} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <TextField name ="amount" label = "Amount" value = {form.amount} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <TextField name ="recipe" label = "Recipe (optional)" value = {form.recipe} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <Button variant = "contained" type = "submit" fullWidth>
-                        {editingID? "Update Item" : "Add Item"}
-                    </Button>
-                </form>
-            </Paper>
-            <Paper>
-                <List>
-                    {custom.map((item) => (
-                        <React.Fragment key = {item.id}>
-                            <ListItem>
-                                <ListItemText primary={`${item.ingredient} (${item.amount})`} secondary = {`From: ${item.recipe}`}/>
-
-                                <IconButton onClick={() => edit(item)}>
-                                    <EditIcon/>
-                                </IconButton>
-
-                                <IconButton onClick={() => deleteItem(item.id)}>
-                                    <DeleteIcon/>
-                                </IconButton>
-                            </ListItem>
-                            <Divider />
-                        </React.Fragment>
-                    ))}
-                </List>
-            </Paper>
-        </Box>
+            </Grid>
+        </Container>
+               
     )
 }
 export default GroceryList

@@ -1,16 +1,22 @@
+/* Import a modern font from Google */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
   --color-primary: #d62828;
   --color-secondary: #f77f00;
-  --color-background: white;
-  --color-text-dark: #003049;
-  --color-accent-light: #FCBF49;
+  --color-background: #fafafa;
+  --color-surface: #fef7f0;
+  --color-text-dark: #212529;
+  --color-text-light: #6c757d;
+  --color-accent-light: #fcbf49;
 
-  background-color: var(--color-background);
-  color: var(--color-text-dark);
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb( 0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 /0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -29,81 +35,57 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  padding: 0;
+  width: 100%;
   min-height: 100vh;
   background-color: var(--color-background);
+  color: var(--color-text-dark)
 }
 
-h1 {
-  color: var(--color-text-dark);
-  font-size: 3.2em;
-  line-height: 1.1;
-}
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: var(--color-primary);
-  color: white;
-  cursor: pointer;
-  transition: background-color 0.25s;
-}
-button:hover {
-  border-color: var(--color-secondary);
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-.site-header{
-  background-color: var(--color-background);
-  padding: 10px 40px;
+header{
+  background-color: var(--color-surface);
+  padding: 0px 40px;
+  height: 80px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  min-height: 100px;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .app-logo{
-  height: 100px;
-  margin-right: 15px;
-  margin-top: 15px;
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+}
+.header-nav{
+  display: flex;
+  gap: 20px;
 }
 
 .nav-link{
   color: #f77f00;
-  font-size: 1.1em;
-  padding: 5px 10px;
-  border-radius: 4px;
-  transition: background-color 0.3s, color 0.3s;
+  font-weight: 600;
+  font-size: 1rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
 }
 
 .nav-link:hover{
+  background-color: #fff4e6;
   color: var(--color-accent-light);
 }
 
-.content{
-  padding: 20px;
+button {
+  font-family: inherit;
 }
 
-
+h1, h2, h3, h4, h5, h6{
+  color: var(--color-text-dark);
+  margin-top: 0;
+}
