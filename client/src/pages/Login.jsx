@@ -1,7 +1,14 @@
 import { GoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
-//import { jwtDecode } from "jwt-decode";
-//I still dont think the decod should work without this package but in case it does work regardless I left it commented out
+import {Grid, Box, Paper, Typography, List, ListItem, ListItemIcon, ListItemText} from '@mui/material'
+import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
+import PeopleIcon from '@mui/icons-material/People'
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
+
+
+import TextLogo from "./TextLogo.png"
+
 function Login(){
     const navigate = useNavigate()
 
@@ -41,32 +48,59 @@ function Login(){
     }
 
     return(
-        <div
-            style={{
-                display:"flex",
-                justifyContent: "center",
-                alignItems: "center",
-                flexDirection: "column",
-                gap: "20px"
-            }}
-        >
-            <img src = "./src/TextLogo.png"></img>
-            <h1 style={{marginBottom: 2}}>Welcome to Meal Mate!</h1>
-            <h2 style = {{marginTop: 2}}>Please login with Google</h2>
+        <Box sx = {{minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#f9f7f7ff'}}>
+            <Paper elevation={4} sx = {{width: '100%', maxWidth: '1150px', height: 600, borderRadius: 3, display: "flex", flexDirection: "column"}}>
+                <Grid container sx = {{height: '100%'}}>
+                    {/*Left column of Login page has features of MealMate*/}
+                    <Grid item xs = {12} md = {6} sx ={{background: 'linear-gradient(135deg, #d62828 0%, #f77f00 100%)', color: "white", display:"flex",
+                        flexDirection: 'column', justifyContent: 'center', padding:6
+                    }}>
+                        <Box>
+                            <Box sx = {{display: 'flex', alignItems: 'center', gap:2, mb: 1}}>
+                                <RestaurantMenuIcon sx = {{fontSize: 45}}/>
+                                <Typography variant = "h3" fontWeight="700" color = "white">Welcome to Meal Mate!</Typography>
+                            </Box>
 
-            <GoogleLogin onSuccess={handleSuccess}
-            //The following is Josh's code - I made a function to handle some more of the backend stuff
-            // onSuccess ={(credentialResponse) => {
-            //     //will want to put this code on a longin page but is here for now
-            //     //Go somewhere after loging in 
-            //     //cedentialResponse holds user info 
-            //     //json Object with user info 
-            //     const userInfo = jwtDecode(credentialResponse.credential)
-            //     console.log(userInfo)
-            // }} 
-            onError={() => console.log("Login failed")}/>
-        </div>
+                            <Typography variant = "h6" color = "white" sx = {{mb: 6, ml:15, fontWeight: 300, opacity: 0.9}}>
+                                Simplify your kitchen. Organize your life.
+                            </Typography>
+
+                            <List sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
+                                <FeatureItem icon = {<CheckCircleOutlineIcon fontSize= "large"/> } text = "Plan your weekly meals with ease"/>
+                                <FeatureItem icon = {<ShoppingCartIcon fontSize= "large"/>} text = "Automated grocery lists from recipes"/>
+                                <FeatureItem icon = {<PeopleIcon fontSize= "large"/>} text ="Collaborate with your household"/>
+                            </List>
+                        </Box>
+                    </Grid>
+                    {/*Right column has the login action */}
+                    <Grid item xs ={12} md ={6} sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', margin: 'auto' , backgroundColor: 'white', padding: 4}}>
+                        <Box sx = {{width: '100%', maxWidth: 350,  display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center'}}>
+                            <img src={TextLogo} alt = "Meal Mate" style = {{height: 100, marginBottom: 50}}/>
+                            <Typography variant = "h4" fontWeight="bold" gutterBottom sx = {{color: "#f77f00"}}>
+                                Welcome Back
+                            </Typography>
+                            <Typography variant = "h6" color = "text.secondary" sx = {{mb:5}}>
+                                Please sign in with Google to access your meal plans.
+                            </Typography>
+                            <Box sx = {{display: 'flex', justifyContent: 'center', width: '100%', transform: 'scale(1.5)'}}>
+                                <GoogleLogin onSuccess={handleSuccess} onError = {() => console.log("Login failed")} theme = "filled_orange" shape = "pill" size = "large"/>
+                            </Box>
+                        </Box>
+                    </Grid>
+                </Grid>
+            </Paper>
+        </Box>
     )
 }
-
+//helper component for the feature list on the left column
+function FeatureItem({icon, text}){
+    return(
+        <ListItem disablePadding>
+            <ListItemIcon sx={{color: 'white', minWidth: 50}}>
+                {icon}
+            </ListItemIcon>
+            <ListItemText primary = {<Typography variant = "h6" fontWeight="500" sx = {{fontSize: '1.4rem', color: 'white'}}> {text} </Typography>} />
+        </ListItem>
+    )
+}
 export default Login
