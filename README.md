@@ -54,6 +54,8 @@ You must have node.js running on your machine. Once you have cloned this project
  * @react-oauth/google
  * @mui/material
  * @mui/icons-material
+ * @mui/x-date-pickers
+ * dayjs
  * @fullcalendar/react
  * @fullcalendar/interaction
  * @fullcalendar/daygrid
