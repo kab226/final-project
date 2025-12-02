@@ -115,7 +115,8 @@ app.post("/auth/google", async(req, res) => {
 
         res.json({
             email: user.email,
-            role: user.role
+            role: user.role,
+            household: user.household_id
         })
 
     }catch(error){
