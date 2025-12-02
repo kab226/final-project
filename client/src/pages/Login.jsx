@@ -27,7 +27,13 @@ function Login(){
             localStorage.setItem("x-user", data.email)
             localStorage.setItem("role", data.role)
 
-            navigate("/household")
+            //navigates to dashboard if household already selected
+            if(data.household !== null){
+                navigate("/dashboard")
+            }else{
+                navigate("/household")
+            }
+            
         }
         catch(err){
             console.error("Login error: ", err)
