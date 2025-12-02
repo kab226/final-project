@@ -2,10 +2,14 @@ import {useState, useEffect } from "react"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import interactionPlugin from "@fullcalendar/interaction"
-import {Grid, Card, CardContent, CardMedia, Typography, TextField, Button, Modal, Snackbar, Alert} from "@mui/material"
+import {Grid, Box, Card, Paper, Container, CardContent, CardMedia, Typography, TextField, Button, Modal, Snackbar, Alert} from "@mui/material"
 import {extractIngredients} from '../components/ExtractIngredients'
 import CreateRecipeModal from '../components/CreateRecipeModal'
 
+import {LocalizationProvider} from "@mui/x-date-pickers/LocalizationProvider"
+import {DatePicker} from '@mui/x-date-pickers/DatePicker'
+import {AdapterDayjs} from '@mui/x-date-pickers/AdapterDayjs'
+import dayjs from "dayjs"
 
 function Dashboard(){
     const [weekRecipes, setWeekRecipes] = useState([])
@@ -17,15 +21,13 @@ function Dashboard(){
 
     const [modalOpen, setModalOpen] = useState(false)
     const [selectedRecipe, setSelectedRecipe] = useState(null)
-    const [selectedDate, setSelectedDate] = useState(null)
+    const [selectedDate, setSelectedDate] = useState(dayjs())
     const [customNotes, setCustomNotes] = useState("")
     const [createRecipeModalOpen, setCreateRecipeModalOpen] = useState(false)
 
     const currentUserRole = localStorage.getItem("role")
     const isAdmin = currentUserRole === "admin"
     
-
-
 
     //load in weekly calendar
     const loadWeekRecipes = async() => {
@@ -69,6 +71,7 @@ function Dashboard(){
     const handleEventDrop = async(info) => {
         const {id, title} = info.event
         const newDay = info.event.startStr
+
         try{
             await fetch(`http://localhost:3000/week-recipes/${id}`, {
                 method: "PUT",  
@@ -82,7 +85,7 @@ function Dashboard(){
             })
 
             await loadWeekRecipes()
-            setSnackbar({open: true, message: "Meal moved successfully!", severity: "error"})
+            setSnackbar({open: true, message: "Meal moved successfully!", severity: "success"})
         }catch(err){
             console.error(err)
             setSnackbar({open: true, message: "Failed to move meal", severity: "error"})
@@ -111,12 +114,13 @@ function Dashboard(){
             setSnackbar({open: true, message: "Failed to add meal", severity: "error"})
         }
     }
+
 //make this admin only
     const removeMeal = async(meal_id) => {
         try{
             await fetch(`http://localhost:3000/week-recipes/${meal_id}`, {
                 method: "DELETE", 
-                headers: {"Content-Type": "application/json",
+                headers: {
                     "x-user": localStorage.getItem("x-user")},
             })
             await loadWeekRecipes()
@@ -161,23 +165,14 @@ function Dashboard(){
     }
 
 
-    //FullCalendar Day Click
-    const handleDateClick = (info) => {
-        const day = info.dateStr
-        setModalOpen(true)
-    }
-
     const handleModalAdd = async () => {
-        if(!selectedRecipe || !selectedDate) return
-        await addToCalendar({...selectedRecipe, ingredients: customNotes}, selectedDate)
+        await addToCalendar({...selectedRecipe, ingredients: customNotes}, selectedDate.format("YYYY-MM-DD"))
         setModalOpen(false)
-        setSelectedRecipe(null)
-        setCustomNotes("")
     }
 
-    const handleModalOpen= () =>{
-        setCreateRecipeModalOpen(true)
-    }
+    // const handleModalOpen= () =>{
+    //     setCreateRecipeModalOpen(true)
+    // }
 
     const removeFromCalendar = async(eventId) => {
         if (!window.confirm("Are you sure you want to remove this meal from the calendar?")) {
@@ -202,19 +197,21 @@ function Dashboard(){
     }
 
     const handleEventClick = (info) => {
-        
         const eventId = info.event.id;
         removeFromCalendar(eventId);
     }
 
     return(
-        <div style = {{padding: "20px"}}>
-            <h1>Your Weekly Meal Plan</h1>
-
-            <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
-            initialView = "dayGridWeek" events = {weekRecipes} dateClick = {handleDateClick} eventDrop = {handleEventDrop} eventClick = {handleEventClick} editable = {true}
-            droppable = {true} height = "auto"   displayEventTime={false}/>
-            <Typography variant="h5" sx={{ marginTop: 3 }}>This Week's Meals</Typography>
+        <Container maxWidth= "xl" sx = {{paddingY:4}}>
+            <Box sx={{display: "flex", justifyContent: "space-between", alignItems: "center", mb: 3}}>
+                <Typography variant= "h4" fontWeight = "bold">Weekly Meal Plan</Typography>
+            </Box>
+            <Paper elevation = {2} sx = {{p: 3, mv: 4, borderRadius: 2}}>
+                <FullCalendar plugins={[dayGridPlugin, interactionPlugin]}
+                initialView = "dayGridWeek" events = {weekRecipes}  eventDrop = {handleEventDrop} eventClick = {handleEventClick} editable = {true}
+                droppable = {true} height = "auto"   displayEventTime={false}/>
+            </Paper>
+            <Typography variant="h5" sx={{ marginTop: 3, mb: 2, fontWeight: 600}}>This Week's Meals</Typography>
             <Grid container spacing={2}>
                 {weekRecipes
                 //gets only the meals from this week
@@ -230,15 +227,15 @@ function Dashboard(){
                     return mealDate >= sunday
                 })
                 .map((meal) => (
-                    <Grid item xs={12} sm={6} md={4} key={meal.id}>
-                        <Card>
-                            <CardContent>
-                                <Typography variant="h6">{meal.title}</Typography>
-                                <Typography>Date: {new Date(meal.date).toLocaleDateString()}</Typography>
+                    <Grid item xs={12} sm = {6} md = {3} key={meal.id}>
+                        <Card sx = {{height: '100%', display: 'flex', flexDirection: 'column', boxShadow: 2}}>
+                            <CardContent sx = {{flexGrow: 1}}>
+                                <Typography variant="h6" fontWeight= "bold">{meal.title}</Typography>
+                                <Typography sx = {{mt: 1}}>Date: {new Date(meal.date).toLocaleDateString()}</Typography>
                                 {/* renders only if isAdmin */}
                                 {isAdmin && (
-                                    <Button variant="contained" color="error" sx={{ marginTop: 1 }} onClick={() => removeMeal(meal.id)}>
-                                        Remove Meal
+                                    <Button variant="outlined" color="error" sx={{ marginTop: 2 }} onClick={() => removeMeal(meal.id)}>
+                                        Remove 
                                     </Button>
                                 )}
                             </CardContent>
@@ -248,62 +245,80 @@ function Dashboard(){
             </Grid>
 
 
-            <br/><br/>
+            <Box sx = {{my: 6}}>
+                <Typography variant = "h5" sx = {{mb: 2, fontWeight: 600}}>Recipe Library</Typography>
+                <Box sx = {{display: 'flex', flexDirection: 'column', gap: 2, mb:4}}>
+                    <TextField label = "Search Recipes" fullWidth value = {searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{bgcolor: 'white'}}/>
+                    <Button variant = "contained" size = "large" sx={{minWidth: '150px', backgroundColor: '#f77f00'}}onClick = {()=> setCreateRecipeModalOpen(true)}>
+                        Create Recipe
+                    </Button>
+                </Box>
 
-            <TextField label = "Search Recipes" fullWidth value = {searchTerm} onChange={(e) => setSearchTerm(e.target.value)} sx={{marginBottom: 3, marginTop: 3}}/>
-            
-            <Typography variant = "h5" sx = {{marginBottom: 2}}>Saved Recipes</Typography>
-            <Button variant="contained" color="primary" onClick={() => 
-                setCreateRecipeModalOpen(true)}
-            >Add New Recipe
-            </Button>
-
-            <Grid container spacing = {2}>
-                {savedRecipes.map((r) => (
-                    <Grid item xs = {12} sm = {6} md = {4} key = {r.id}>
-                        <Card draggable onDragStart = {(e) => e.dataTransfer.setData("recipe", JSON.stringify(r))}>
-                            <CardContent>
-                                <Typography variant = "h6">{r.recipe}</Typography>
-                                <Button onClick = {() => addToCalendar(r, prompt("What day? (YYYY-MM-DD)"))}>
-                                    Add to Week
-                                </Button>
-                            </CardContent>
-                        </Card>
+                {savedRecipes.length > 0 && (
+                    <Box sx = {{mb : 5}}>
+                        <Typography variant = 'h6' sx = {{mb: 2}}>Your Saved Recipes</Typography>
+                        <Grid container spacing = {2}>
+                            {savedRecipes.map((r)=> (
+                                <Grid item xs = {12} sm = {6} md = {3} key = {r.id}>
+                                    <Card draggable onDragStart = {(e) => e.dataTransfer.setData("recipe", JSON.stringify(r))} 
+                                    sx = {{cursor: 'grab', '&:hover': {boxShadow: 6}, transition: '0.3s'}}>
+                                        <CardContent>
+                                            <Typography variant = "h6" noWrap>{r.recipe}</Typography>
+                                            <Button size = "small" variant = "outlined" sx = {{borderColor: '#d62828', color: '#212529', mt: 1}} onClick= {() => {setSelectedRecipe(r); setModalOpen(true)}}>
+                                                Add to Calendar
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                </Grid>
+                            ))}
+                        </Grid>
+                    </Box>
+                )}
+                <Box>
+                    <Typography variant = "h6" sx = {{mb: 2}}>Search Results</Typography>
+                    <Grid container spacing = {2}>
+                        {mealDbRecipes.map((meal) => (
+                            <Grid item xs = {12} sm = {6} md = {3} key = {meal.idMeal}>
+                                <Card draggable onDragStart = {(e) => e.dataTransfer.setData("recipe", JSON.stringify(meal))}
+                                    sx = {{height: '100%', cursor: 'grab', '&:hover':{boxShadow: 6}, transition: '0.3s'}}>
+                                    <CardMedia component = "img" height = "180" image = {meal.strMealThumb}/>
+                                    <CardContent>
+                                        <Typography variant = "subtitle1" fontWeight = "bold" noWrap title={meal.strMeal}>{meal.strMeal}</Typography>
+                                        <Box sx={{mt: 2, display: 'flex', flexDirection: 'column', gap: 1}}>
+                                            <Button variant = "outlined" size = "medium" sx = {{borderColor: '#d62828', color: '#212529'}} onClick = {() => {setSelectedRecipe(meal); setModalOpen(true)}}>
+                                                Add to Calendar
+                                            </Button>
+                                            <Button variant = "text" size = "medium" sx = {{borderColor: '#d62828', color: '#212529'}} onClick = {() => {saveRecipe(meal)}}>
+                                                Save Recipe
+                                            </Button>
+                                        </Box>
+                                    </CardContent>
+                                </Card>
+                            </Grid>
+                        ))}
                     </Grid>
-                ))}
-            </Grid>
+                </Box>
+            </Box>
+            <Modal open = {modalOpen} onClose = {() => setModalOpen(false)}>
+                <Box sx={{background: "white", width: 400, margin: "10vh auto", p: 4, borderRadius: 3, boxShadow: 24, outline: 'none'}}>
+                    <Typography variant = "h6" sx = {{mb: 3, fontWeight: 'bold'}}>
+                        {selectedRecipe ? `Add "${selectedRecipe.strMeal || selectedRecipe.recipe}"`: "Add Meal to Calendar"}
+                    </Typography>
 
-            <br/>
+                    {/*Date picker instead of manually entering */}
+                    <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker label = "Meal Date" value = {selectedDate} onChange={(newValue) => setSelectedDate(newValue)} sx={{width: "100%", mb:2}}/>
+                    </LocalizationProvider>
 
-            <Typography variant = "h5" sx = {{marginY: 2}}>
-                Explore Recipes
-            </Typography>
+                    {/*Optipnal Notes */}
+                    <TextField label = "Notes (Optional)" multiline rows = {3} fullWidth value = {customNotes} onChange={(e) => setCustomNotes(e.target.value)} sx = {{mb: 3}}/>
 
-            <Grid container spacing = {2}>
-                {mealDbRecipes.map((meal) => (
-                    <Grid item xs = {12} sm = {6} md = {4} key = {meal.idMeal}>
-                        <Card draggable onDragStart = {(e) => e.dataTransfer.setData("recipe", JSON.stringify(meal))}>
-                            <CardMedia component = "img" height = "180" image = {meal.strMealThumb}/>
-                            <CardContent>
-                                <Typography variant = "h6">{meal.strMeal}</Typography>
-
-                                <Button onClick = {() => addToCalendar(meal, prompt("What day? (YYYY-MM-DD)"))}>
-                                    Add to Week
-                                </Button>   
-                                
-                                <Button onClick = {() => saveRecipe(meal)}>
-                                    Save Recipe
-                                </Button>                               
-                            </CardContent>
-                        </Card>
-                    </Grid>
-                ))}
-            </Grid>
-            
-            {/* <Modal open = {modalOpen}  onClose={() => setModalOpen(false)}>
-                <Typography>Select a Recipe</Typography>
-                <TextField
-            </Modal> */}
+                    <Box sx = {{display: "flex", justifyContent: "flex-end", gap: 2}}>
+                        <Button sx = {{color: '#d62828'}}onClick = {() => setModalOpen(false)}>Cancel</Button>
+                        <Button sx = {{backgroundColor: '#f77f00'}} variant="contained" disabled = {!selectedDate || !selectedRecipe} onClick={handleModalAdd}>Add Meal</Button>
+                    </Box> 
+                </Box>
+            </Modal>
             
             <Snackbar open={snackbar.open} autoHideDuration={3000} onClose={() => setSnackbar({...snackbar, open:false})}>
                 <Alert severity = {snackbar.severity} sx = {{ width: "100%"}}>{snackbar.message}</Alert>
@@ -311,7 +326,7 @@ function Dashboard(){
             <CreateRecipeModal createRecipeModalOpen = {createRecipeModalOpen} 
                 setCreateRecipeModalOpen = {setCreateRecipeModalOpen}
                 refreshSavedRecipes = {loadSavedRecipes} />
-        </div>
+        </Container>
 
         
     )
