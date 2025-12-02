@@ -141,6 +141,7 @@ function GroceryList(){
     }
 
     return(
+
         <Container maxWidth="md" sx = {{mt: 5, mb: 10}}>
             <Box sx={{display: 'flex', alignItems: 'center', mb: 4}}>
                 <Typography variant = "h4" fontWeight="bold">
@@ -237,57 +238,6 @@ function GroceryList(){
             </Grid>
         </Container>
                
-        <Box sx={{maxWidth: 650, mx: "auto", mt:4}}>
-            <Typography variant = "h4" gutterBottom>
-                Grocery List
-            </Typography>
-
-            <Typography variant="h6" sx={{mt: 3}}>
-                Ingredients From Weekly Meals
-            </Typography>
-
-            <Paper sx = {{ mt:1}}>
-                <List>
-                    {items.map((i, index) => (
-                        <ListItem key = {index}>
-                            <ListItemText primary={`${i.ingredient} (${i.amount})`} secondary = {`From: ${i.recipe}`}/>
-                        </ListItem>
-                    ))}
-                </List>
-            </Paper>
-
-            <Typography variant="h6" sx={{mt: 3}}>
-                Your Custom Items
-            </Typography>
-
-            <Paper sx = {{ p: 2, mb: 3}}>
-                <form onSubmit={handleSubmit}>
-                    <TextField name ="ingredient" label = "Ingredient" value = {form.ingredient} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <TextField name ="amount" label = "Amount" value = {form.amount} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <TextField name ="recipe" label = "Recipe (optional)" value = {form.recipe} onChange={handleChange} fullWidth sx = {{mb:2}}/>
-                    <Button variant = "contained" type = "submit" fullWidth>
-                        {editingID? "Update Item" : "Add Item"}
-                    </Button>
-                </form>
-            </Paper>
-            <Paper>
-                <List>
-                    {custom.map((item) => (
-                        <ListItem key = {item.id}>
-                            <ListItemText primary={`${item.ingredient} (${item.amount})`} secondary = {`From: ${item.recipe}`}/>
-
-                            <IconButton onClick={() => edit(item)}>
-                                <EditIcon/>
-                            </IconButton>
-
-                            <IconButton onClick={() => deleteItem(item.id)}>
-                                <DeleteIcon/>
-                            </IconButton>
-                        </ListItem>
-                    ))}
-                </List>
-            </Paper>
-        </Box>
     )
 }
 export default GroceryList
