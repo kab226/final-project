@@ -25,38 +25,54 @@ function GroceryList(){
                 {   method:"GET",
                     headers: {"Content-type": "application/json",
                         "x-user": localStorage.getItem("x-user")},
-                    body: JSON.stringify({household_id})
+                    // body: JSON.stringify({household_id})
             })
             const weekRecipes = await res.json()
-            const allIngredients = []
+            const mergedIngredients = {}
 
-            for(const entry of weekRecipes){
-                const mealName = entry.recipe
+            weekRecipes                
+                .filter((meal) => {
+                    const mealDate = new Date(meal.day)
 
-                //makes a call to MealDB
-                const api = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?s=${mealName}`)
-                const data = await api.json()
+                    // get start of the current week
+                    const today = new Date()
+                    const day = today.getDay() // 0 (Sun) - 6 (Sat)
+                    const startOfWeek = new Date(today)
+                    startOfWeek.setDate(today.getDate() - day)
+                    startOfWeek.setHours(0, 0, 0, 0)
 
-                if(!data.meals) continue
+                    // get end of the current week
+                    const endOfWeek = new Date(startOfWeek)
+                    endOfWeek.setDate(startOfWeek.getDate() + 6)
+                    endOfWeek.setHours(23, 59, 59, 999)
 
-                const meal = data.meals[0]
+                    return mealDate >= startOfWeek && mealDate <= endOfWeek
+                })
+                .forEach((recipe) => {
+                    const mealName = recipe.recipe
+                    // ingredients field is already an array of objects
+                    recipe.ingredients.forEach((item) => {
+                    const key = item.ingredient.toLowerCase()
 
-                for(let i = 1; i <= 20; i++){
-                    const ingredient = meal[`strIngredient${i}`]
-                    const amount = meal[`strMeasure${i}`]
+                    if (mergedIngredients[key]) {
+                            // Merge the recipe sources
+                            mergedIngredients[key].recipe.push(mealName)
 
-                    if(ingredient && ingredient.trim() !==""){
-                        allIngredients.push({
-                            ingredient,
-                            amount,
-                            recipe: mealName,
-                            auto: true
-                        })
-                    }
-
-                }
-
-            }
+                            // Combine amounts as string (can later improve to sum numbers)
+                            mergedIngredients[key].amount += ` + ${item.measurement}`
+                        } else {
+                            mergedIngredients[key] = {
+                                ingredient: item.ingredient,
+                                amount: item.measurement,
+                                recipe: [mealName],
+                                auto: true,
+                            }
+                        }
+                    })
+            
+                })
+                const allIngredients = Object.values(mergedIngredients).map((item) => ({ ...item, recipe: item.recipe.join(", "), }))
+                .sort((a, b) => a.ingredient.localeCompare(b.ingredient))
             setItems(allIngredients)
         }catch(err){
             console.error("Loading error", err)
@@ -68,9 +84,10 @@ function GroceryList(){
     const loadCustom = async() => {
         try{
             const res = await fetch("http://localhost:3000/grocery-list", {
+                method: "GET",
                 headers: {"Content-type": "application/json",
                         "x-user": localStorage.getItem("x-user")},
-                body: JSON.stringify({household_id})
+                // body: JSON.stringify({household_id})
             })
             const data = await res.json()
             setCustom(data)
@@ -103,7 +120,7 @@ function GroceryList(){
 
     //delete a custom item
     const deleteItem = async(id) => {
-        await fetch('http://localhost:3000/grocery-list/${id}', {
+        await fetch(`http://localhost:3000/grocery-list/${id}`, {
             method: "DELETE", 
             headers: {"x-user": localStorage.getItem("x-user")}
         })
@@ -123,7 +140,7 @@ function GroceryList(){
     return(
         <Box sx={{maxWidth: 650, mx: "auto", mt:4}}>
             <Typography variant = "h4" gutterBottom>
-                GroceryList
+                Grocery List
             </Typography>
 
             <Typography variant="h6" sx={{mt: 3}}>
@@ -133,12 +150,9 @@ function GroceryList(){
             <Paper sx = {{ mt:1}}>
                 <List>
                     {items.map((i, index) => (
-                        <React.Fragment key = {index}>
-                            <ListItem>
-                                <ListItemText primary={`${i.ingredient} (${i.amount})`} secondary = {`From: ${i.recipe}`}/>
-                            </ListItem>
-                            <Divider />
-                        </React.Fragment>
+                        <ListItem key = {index}>
+                            <ListItemText primary={`${i.ingredient} (${i.amount})`} secondary = {`From: ${i.recipe}`}/>
+                        </ListItem>
                     ))}
                 </List>
             </Paper>
@@ -160,20 +174,17 @@ function GroceryList(){
             <Paper>
                 <List>
                     {custom.map((item) => (
-                        <React.Fragment key = {item.id}>
-                            <ListItem>
-                                <ListItemText primary={`${item.ingredient} (${item.amount})`} secondary = {`From: ${item.recipe}`}/>
+                        <ListItem key = {item.id}>
+                            <ListItemText primary={`${item.ingredient} (${item.amount})`} secondary = {`From: ${item.recipe}`}/>
 
-                                <IconButton onClick={() => edit(item)}>
-                                    <EditIcon/>
-                                </IconButton>
+                            <IconButton onClick={() => edit(item)}>
+                                <EditIcon/>
+                            </IconButton>
 
-                                <IconButton onClick={() => deleteItem(item.id)}>
-                                    <DeleteIcon/>
-                                </IconButton>
-                            </ListItem>
-                            <Divider />
-                        </React.Fragment>
+                            <IconButton onClick={() => deleteItem(item.id)}>
+                                <DeleteIcon/>
+                            </IconButton>
+                        </ListItem>
                     ))}
                 </List>
             </Paper>

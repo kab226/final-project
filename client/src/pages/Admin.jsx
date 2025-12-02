@@ -16,6 +16,7 @@ function HouseholdAdminPage() {
     const loadUsers = async () => {
         try {
             const res = await fetch("http://localhost:3000/household/users", {
+                method: "GET",
                 headers: { 
                     'Content-Type': 'application/json',
                     "x-user": localStorage.getItem("x-user"),
