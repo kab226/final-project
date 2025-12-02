@@ -99,7 +99,7 @@ function Dashboard(){
                     "x-user": localStorage.getItem("x-user")},
                 body: JSON.stringify({
                     recipe: recipe.strMeal || recipe.recipe,
-                    ingredients: JSON.stringify(ingredients),
+                    ingredients: ingredients,
                     day
                 })
             })
