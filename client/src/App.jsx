@@ -46,6 +46,7 @@ function App() {
 
         {/*Protecting this page*/}
         <Route element = {<ProtectedLayout/>}>
+        {/*Add route on nav bar to go to view household - users can view, admin can edit the page*/}
             <Route path = "/household" element = {<HouseholdSetup/>}/>
             <Route path = "/dashboard" element = {<Dashboard/>}/>
             <Route path = "/grocery-list" element = {<GroceryList/>}/>
