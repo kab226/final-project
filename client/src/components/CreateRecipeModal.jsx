@@ -1,6 +1,6 @@
 //this is going to hold all the logic to add a transaction
 import { useState} from 'react'
-import {Button, Modal, Box, TextField, Stack, IconButton} from  '@mui/material'
+import {Button, Modal, Box, TextField, Stack, IconButton, Typography, outlinedInputClasses} from  '@mui/material'
 import {Add, Remove} from '@mui/icons-material'
 
 const style = {
@@ -8,12 +8,15 @@ const style = {
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  width: 400,
+  width: 500,
   bgcolor: 'white',
-  border: '2px solid #000',
   boxShadow: 24,
-  p: 4
+  p: 4,
+  borderRadius: 3, 
+  outline: 'none', 
+  maxHeight: '90vh',
 }
+
 export default function CreateRecipeModal({createRecipeModalOpen, setCreateRecipeModalOpen, refreshSavedRecipes
 }) {
     const [recipe, setRecipe] = useState('')
@@ -77,38 +80,38 @@ export default function CreateRecipeModal({createRecipeModalOpen, setCreateRecip
     return(
         <Modal open= {createRecipeModalOpen} onClose={handleModalClose}>
           <Box sx={style}>
-            <h3>Enter Recipe Details</h3>
-            <Stack spacing = {2}>
-              <TextField required label ="Recipe Name" onChange = {event => 
+            <Typography variant = "h5" fontWeight="bold" sx = {{mb: 3}}>Enter Recipe Details</Typography>
+            <Stack spacing = {3}>
+              <TextField required label ="Recipe Name" fullWidth variant="outlined" onChange = {event => 
                 setRecipe(event.target.value)}/>
-           {ingredients.map((ing, index) => (
-                <Stack key={index} direction="row" spacing={1}>
-                <TextField required label="Ingredient" value={ing.ingredient} onChange={(e) => 
-                    handleIngredientChange(index, 'ingredient', e.target.value)}
-                    fullWidth
-                />
-                <TextField required label="Amount" value={ing.measurement} onChange={(e) => 
-                    handleIngredientChange(index, 'measurement', e.target.value)}
-                />
-                <IconButton onClick={() => removeIngredientField(index)} disabled={ingredients.length === 1}>
-                    <Remove />
-                </IconButton>
+              <Box>
+                <Typography variant = "subtitle2" sx= {{mb:1, color: 'text.secondary'}}>Ingredients</Typography>
+                <Stack spacing = {2}>
+                      {ingredients.map((ing, index) => (
+                          <Stack key={index} direction="row" spacing={1} alignItems="center">
+                          <TextField required label="Ingredient" value={ing.ingredient} fullWidth size="small" onChange={(e) => 
+                              handleIngredientChange(index, 'ingredient', e.target.value)}
+                          />
+                          <TextField required label="Amount" value={ing.measurement} size= "small" sx={{width: '120px'}} onChange={(e) => 
+                              handleIngredientChange(index, 'measurement', e.target.value)}
+                          />
+                          <IconButton onClick={() => removeIngredientField(index)} disabled={ingredients.length === 1} color = "error">
+                              <Remove />
+                          </IconButton>
+                          </Stack>
+                      ))}
                 </Stack>
-            ))}
-
-            <Button sx= {{color: '#f77f00'}} startIcon={<Add />} onClick={addIngredientField}>
-                Add Ingredient
-            </Button>
-
-                <TextField label = "Notes" onChange = {event =>
-                  setNotes(event.target.value)}/>
-
+                <Button startIcon={<Add />} onClick={addIngredientField} sx = {{mt: 1}}>
+                      Add Another Ingredient
+                </Button>
+              </Box>
+              <TextField label = "Notes (Optional)" multiline rows = {3} onChange={e => setNotes(e.target.value)}/>  
+              <Box sx = {{display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2}}>
+                  <Button onClick = {addRecipe} sx= {{color: '#f77f00'}}>Add Recipe</Button>
+                  <Button onClick = {handleModalClose} sx= {{color: '#d62828'}}>Close</Button>
+              </Box>
             </Stack>
-            <Button onClick = {addRecipe} sx= {{color: '#f77f00'}}>Add Recipe</Button>
-            <Button onClick = {handleModalClose} sx= {{color: '#d62828'}}>Close</Button>
           </Box>
         </Modal>
     )
-  
-
 }
