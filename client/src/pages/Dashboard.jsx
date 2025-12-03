@@ -95,7 +95,14 @@ function Dashboard(){
     //add recipe to calendar
     const addToCalendar = async(recipe, day) => {
         try{
-            const ingredients = recipe.idMeal ? extractIngredients(recipe) : recipe.ingredients
+            let ingredients
+            if (recipe.idMeal) {
+                ingredients = extractIngredients(recipe) // MealDB recipes
+            } else {
+                // Saved recipe: parse JSON string
+                ingredients = Array.isArray(recipe.ingredients) ? recipe.ingredients: JSON.parse(recipe.ingredients || "[]")
+            }
+
             await fetch("http://localhost:3000/week-recipes", {
                 method: "POST", 
                 headers: {"Content-Type": "application/json",
@@ -166,7 +173,7 @@ function Dashboard(){
 
 
     const handleModalAdd = async () => {
-        await addToCalendar({...selectedRecipe, ingredients: customNotes}, selectedDate.format("YYYY-MM-DD"))
+        await addToCalendar(selectedRecipe, selectedDate.format("YYYY-MM-DD"))
         setModalOpen(false)
     }
 
