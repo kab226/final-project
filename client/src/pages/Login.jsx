@@ -33,7 +33,13 @@ function Login(){
 
             localStorage.setItem("x-user", data.email)
             localStorage.setItem("role", data.role)
-
+            if(data.household_name){
+                localStorage.setItem("household_name", data.household_name)
+                localStorage.setItem("household_id", data.household)
+            }else{
+                localStorage.removeItem("household_name")
+                localStorage.removeItem("household_id")
+            }
             //navigates to dashboard if household already selected
             if(data.household !== null){
                 navigate("/dashboard")

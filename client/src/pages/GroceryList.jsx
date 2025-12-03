@@ -151,9 +151,9 @@ function GroceryList(){
 
             <Grid container spacing = {4}>
                 {/*Weekly Ingredients */}
-                <Grid item xs = {12} md = {6}>
+                <Grid sx = {{width: '1200px'}}>
                     <Typography variant = "h6" sx = {{mb: 2, display: 'flex', alignItems: 'center', gap: 1}}>
-                        <ShoppingCartIcon color = "primary"/> From Weekly Meals
+                        <ShoppingCartIcon htmlColor="#f77f00"/> From Weekly Meals
                     </Typography>
                     <Paper elevation = {2} sx = {{borderRadius: 2}}>
                         {items.length === 0? (
@@ -193,7 +193,7 @@ function GroceryList(){
                                     <TextField name ="recipe" label = "For Recipe (Optional)" size = "small" value = {form.recipe} onChange={handleChange} fullWidth/>
                                 </Grid>
                                 <Grid item xs = {12}>
-                                    <Button variant = "contained" type = "submit" fullWidth startIcon= {!editingID && <AddIcon />}>
+                                    <Button variant = "contained" type = "submit" sx = {{backgroundColor: '#f77f00'}}fullWidth startIcon= {!editingID && <AddIcon />}>
                                         {editingID? "Update Item" : "Add Item"}
                                     </Button>
                                     {editingID && (
