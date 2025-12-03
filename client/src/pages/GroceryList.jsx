@@ -24,7 +24,8 @@ function GroceryList(){
     //Get the gorcery list based on the week recipes and MealDB ingredients
     const loadFromRecipes = async() => {
         try{
-            const res = await fetch("http://localhost:3000/week-recipes",  
+            const household_id = localStorage.getItem("household_id")
+            const res = await fetch(`http://localhost:3000/week-recipes?household_id=${household_id}`,  
                 {   method:"GET",
                     headers: {"Content-type": "application/json",
                         "x-user": localStorage.getItem("x-user")},
