@@ -75,4 +75,5 @@ You must have node.js running on your machine. Once you have cloned this project
  *  pg
 
 ## API Keys & Database Setup (What environment variables or external configurations are needed)
-* 
+* For the Google Authenticator to work, you need to provide the server side with Google Client ID
+* To connect to the Supabase database, the postgres information will need to be provided. (user, password, host, port, and dbname)
