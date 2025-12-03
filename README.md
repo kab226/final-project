@@ -7,9 +7,9 @@ A meal planning site that allows you to plan meals for yourself and your househo
 ### Joshua Bower
 Role: Authentication and External API
 ### Katrina Bui
-Role: Internal API
+Role: Database Development and Internal API
 ### Olivia Newman
-Role: Frontend developer
+Role: Frontend developer and UX/UI
 
 
 ## Application Features
