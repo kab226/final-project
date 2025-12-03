@@ -30,9 +30,11 @@ function Login(){
             }
 
             const data = await res.json()
+            console.log(data)
 
             localStorage.setItem("x-user", data.email)
             localStorage.setItem("role", data.role)
+            localStorage.setItem("household_id", data.household)
 
             //navigates to dashboard if household already selected
             if(data.household !== null){

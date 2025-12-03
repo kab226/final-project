@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from "react"
 
 //This comment it how we will call it in the web page later 
 /*
@@ -28,7 +28,7 @@ export default function RecipeSearch({onSelect, placeholder = "Search for a reci
     const [error, setError] = useState(null)
 
     const handleSearch = async () => {
-        if (!query) return;
+        if (!query) return
         setLoading(true)
         setError(null)
 
