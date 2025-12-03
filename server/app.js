@@ -104,7 +104,7 @@ app.post("/auth/google", async(req, res) => {
         }
 
         const addAdmin = approvedAdmins.includes(email)
-
+        
         if (user.role !== "admin" && addAdmin){
             const update = await query(
                 `UPDATE "UserInformation" SET role = 'admin' WHERE email = $1 RETURNING *`, [email]
@@ -112,11 +112,19 @@ app.post("/auth/google", async(req, res) => {
 
             user = update.rows[0]
         }
+        let householdName = null
+        if(user.household_id){
+            const householdResult = await query(`SELECT household_name FROM "Households" WHERE id = $1`, [user.household_id])
+            if(householdResult.rows.length > 0){
+                householdName = householdResult.rows[0].household_name
+            }
+        }
 
         res.json({
             email: user.email,
             role: user.role,
-            household: user.household_id
+            household: user.household_id,
+            household_name: householdName
         })
 
     }catch(error){
@@ -344,12 +352,22 @@ app.put('/households/:id', requireUser, (req,res) => {
     }
 })
 //deletes an entry based on the id
-app.delete('/households/:id', requireUser, (req, res) => {
+app.delete('/households/:id', requireUser, async(req, res) => {
     try{
         const id = req.params.id
-        const qs = `DELETE from "Households" where id = ${id}`
-        query(qs).then(data => res.send(`${data.rowCount} row deleted`))
+        //first update to remove household reference from users, reset role to "user"
+        const updateQS = `UPDATE "UserInformation" SET household_id = NULL, role = $2 WHERE household_id = $1`
+        await query(updateQS, [id, 'user'])
+
+        const deleteRecipeQS = `DELETE from "WeekRecipes" where household_id = $1`
+        await query(deleteRecipeQS, [id])
+
+        const deleteHouseholdQS= `DELETE from "Households" where id = $1`
+        const data = await query(deleteHouseholdQS, [id])
+
+        res.send(`${data.rowCount} row deleted and users updates`)
     }catch(err){
+        console.error("Error deleting household:", err)
         res.send('error', err)
     }
 })
@@ -381,18 +399,27 @@ app.post('/households/join', requireUser, async (req, res) => {
       // Household already exists
       householdID = selectResult.rows[0].id
     }
+    //If new household, they are admin; if not, user. If only one in house, should be admin
+    let newRole = 'user'
+    if(isNew){
+        newRole = 'admin'
+    }else{
+        //check for existing admins - if no admins, then user will default to admin for that household
+        const adminQS = `SELECT COUNT(id) FROM "UserInformation" WHERE household_id = $1 AND role = $2`
+        const adminRes = await query(adminQS, [householdID, 'admin'])
+        const adminCount = parseInt(adminRes.rows[0].count)
 
-    // Update user's household_id
-    const updateQS = `UPDATE "UserInformation" SET household_id = $1, role = 'user' WHERE id = $2 RETURNING id, household_id`
-    await query(updateQS, [householdID, userId])
-
-    if (isNew) {
-        const userQS = `UPDATE "UserInformation" SET role = 'admin' WHERE id = $1 RETURNING id, role`
-        await query(userQS, [userId])
+        if (adminCount===0){
+            newRole = 'admin'
+        }
     }
 
+    // Update user's household_id
+    const updateQS = `UPDATE "UserInformation" SET household_id = $1, role = $3 WHERE id = $2 RETURNING id, household_id, role`
+    const updateResult = await query(updateQS, [householdID, userId, newRole])
+
     // Respond with success
-    res.json({ joined: true, household_id: householdID, is_admin: isNew, role: req.user.role})
+    res.json({ joined: true, household_id: householdID, is_admin: isNew, role: updateResult.rows[0].role, household_name: household_name.trim()})
   } catch (err) {
     console.error("Error in /households/join:", err)
     res.status(500).json({ error: "Server error joining household" })
@@ -423,9 +450,17 @@ app.delete('/household/users/:id', requireUser, async (req, res) => {
 
     const userToRemove = req.params.id
     const householdID = req.user.household_id
+    //Prevent deleting the last admin for a household
+    const adminCheckQS = `
+        SELECT COUNT(id) FROM "UserInformation" WHERE household_id = $1 AND role = 'admin' and id != $2`
+    const adminCount = await query(adminCheckQS, [householdID, userToRemove])
+    const remaining = parseInt(adminCount.rows[0].count)
+    if (remaining === 0){
+        return res.status(400).json({error: "Cannot remove last admin of household"})
+    }
 
     // Ensure you're removing from same household
-    const qs =       `DELETE FROM "UserInformation" WHERE id = $1 AND household_id = $2`
+    const qs =  `DELETE FROM "UserInformation" WHERE id = $1 AND household_id = $2`
     await query(qs, [userToRemove, householdID])
 
     res.json({ success: true })

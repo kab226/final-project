@@ -60,17 +60,15 @@ function HouseholdSetup(){
                 return
             }
             localStorage.setItem("household_id", data.household_id)
-
             localStorage.setItem('role', data.role)
+            localStorage.setItem('household_name', nameUsed)
+            //refresh window to update chip w/ household name
+            window.dispatchEvent(new Event("storage"))
 
             setStatus("Joined household successfully!")
             setTimeout(()=> {
-                // if (data.is_admin || data.role === 'admin'){
-                    navigate("/household-admin")
-                // }else{
-                //     navigate("/dashboard")
-                // }
-            }, 1200)
+                navigate("/dashboard")
+            }, 800)
         } catch(err){
             console.error(err)
             setStatus("Server error joining household.")
@@ -87,7 +85,7 @@ function HouseholdSetup(){
                 </Box>
 
                 <Typography variant = "h4" fontWeight="bold" gutterBottom>Join a Household </Typography>
-                <Typography variant = "body1" color= "text.secondary" sx = {{mb:2}}>
+                <Typography variant = "h6" color= "text.secondary" sx = {{mb:2}}>
                     Connect with your family or roommates to share meals and grocery lists.
                 </Typography>
 
@@ -108,15 +106,15 @@ function HouseholdSetup(){
                 </FormControl>
 
                 <Divider>
-                    <Typography variant = "caption" color = "text.secondary">OR CREATE NEW</Typography>
+                    <Typography variant = "body1" color = "text.secondary">OR CREATE NEW</Typography>
                 </Divider>
 
-                <TextField fullWdith label = "Create New Household Name" variant = "outlined" value = {name}
+                <TextField fullWidth label = "Create New Household" variant = "outlined" value = {name}
                     onChange={(e) => {
                         setName(e.target.value)
                         setSelected("")
                     }}/>
-                <Button onClick={join} variant = "contained" size = "large" fullWidth sx= {{py: 1.5, fontSize: '1.1rem', fontWeight: 600}}>
+                <Button onClick={join} variant = "contained" size = "large" fullWidth sx= {{py: 1.5, fontSize: '1.1rem', fontWeight: 600, backgroundColor:  '#f77f00', color: 'white'}}>
                     Continue
                 </Button>
 
