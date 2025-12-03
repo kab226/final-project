@@ -101,13 +101,13 @@ export default function CreateRecipeModal({createRecipeModalOpen, setCreateRecip
                           </Stack>
                       ))}
                 </Stack>
-                <Button startIcon={<Add />} onClick={addIngredientField} sx = {{mt: 1}}>
+                <Button startIcon={<Add />} onClick={addIngredientField} sx = {{mt: 1, color: '#f77f00'}}>
                       Add Another Ingredient
                 </Button>
               </Box>
               <TextField label = "Notes (Optional)" multiline rows = {3} onChange={e => setNotes(e.target.value)}/>  
               <Box sx = {{display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2}}>
-                  <Button onClick = {addRecipe} sx= {{color: '#f77f00'}}>Add Recipe</Button>
+                  <Button variant = "contained" onClick = {addRecipe} sx= {{backgroundColor: '#f77f00', color: 'white'}}>Add Recipe</Button>
                   <Button onClick = {handleModalClose} sx= {{color: '#d62828'}}>Close</Button>
               </Box>
             </Stack>
