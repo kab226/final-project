@@ -59,7 +59,6 @@ function HouseholdSetup(){
                 setStatus("Error: " + data.error)
                 return
             }
-
             localStorage.setItem("household_id", data.household_id)
 
             localStorage.setItem('role', data.role)
