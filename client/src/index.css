@@ -1,6 +1,7 @@
-/* Import a modern font from Google */
+/* Imported a more a modern font from Google */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
+/*Changed .root to make some formatting easier, but honeslty didn't use all of this*/
 :root {
   font-family: "Inter", system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -42,7 +43,7 @@ body {
   color: var(--color-text-dark)
 }
 
-
+/*Formatting for the MealMate header, logo, and links*/
 header{
   background-color: var(--color-surface);
   padding: 0px 40px;
@@ -85,6 +86,7 @@ button {
   font-family: inherit;
 }
 
+/*Formatting for all headers*/
 h1, h2, h3, h4, h5, h6{
   color: var(--color-text-dark);
   margin-top: 0;
