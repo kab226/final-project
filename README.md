@@ -64,7 +64,7 @@ You must have node.js running on your machine. Once you have cloned this project
  * @emotion/react
 
 #### Server
-You must have node.js running on your machine. Once you have cloned this project you can run `npm install` to install all the packages for this project. Then running `npm run dev` will run the dev version of this code, which will run this project with nodemon. Nodemon auto-restarts the node server every time you make a change to a file. This is very helpful when you are writing and testing code.
+You must have node.js running on your machine. Once you have cloned this project you can run `npm install` to install all the packages for this project. Then running `npm run dev` will run the dev version of this code, which will run this project with nodemon.
  *  @react-oath/google
  *  cors
  *  dotenv
@@ -75,5 +75,5 @@ You must have node.js running on your machine. Once you have cloned this project
  *  pg
 
 ## API Keys & Database Setup (What environment variables or external configurations are needed)
-* For the Google Authenticator to work, you need to provide the server side with Google Client ID
+* For the Google Authenticator to work, you need to provide the client side with Google Client ID
 * To connect to the Supabase database, the postgres information will need to be provided. (user, password, host, port, and dbname)
