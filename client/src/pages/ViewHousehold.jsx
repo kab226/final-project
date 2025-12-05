@@ -1,5 +1,8 @@
+//Household page 
+//this will display the household, all the users information, allows admins to remove users and change roles
+//utilizes a variety of icons from @mui/icons-materials
 import { useState, useEffect } from "react"
-import { Typography, Grid, Card, CardContent, Button, Snackbar, Alert, Container, Box, Paper, Divider, FormControl, InputLabel, Select, MenuItem, TextField, Chip } from "@mui/material"
+import { Typography, Grid, Card, CardContent, Button, Snackbar, Alert, Container, Box, Paper, FormControl, InputLabel, Select, MenuItem, TextField, Chip } from "@mui/material"
 import { useNavigate } from "react-router-dom"
 import HomeIcon from '@mui/icons-material/Home'
 import PersonIcon from '@mui/icons-material/Person'
@@ -7,8 +10,6 @@ import SwapHorizIcon from '@mui/icons-material/SwapHoriz'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever'
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings'
 
-
-//if admin make it so they can remove recipes from the week?
 function ViewHousehold() {
     const [users, setUsers] = useState([])
     const [households, setHouseholds] = useState([])
@@ -25,7 +26,7 @@ function ViewHousehold() {
     //Check if user is admin
     const isAdmin = currentUserRole === 'admin'
 
-  // Load users in household (admin only)
+  // Load users in household
     const loadUsers = async () => {
         try {
             const res = await fetch("http://localhost:3000/household/users", {
@@ -47,7 +48,7 @@ function ViewHousehold() {
             setSnackbar({ open: true, message: "Failed to load users", severity: "error" })
         }
     }
-
+    //fetches all households
     const loadHouseholds = async() => {
         try{
             const res = await fetch("http://localhost:3000/households", {
@@ -97,7 +98,7 @@ function ViewHousehold() {
         }
     }
 
-    //finish this
+    //switches role to the other role
     const changeUserRole = async (id, currentRole) => {
         //switches role
         const newRole = currentRole === "admin" ? "user" : "admin"
@@ -120,6 +121,7 @@ function ViewHousehold() {
         }
     }
 
+    //this will delete the household and make the users' household null
     const deleteHousehold = async() => {
         if(!window.confirm("Warning: This will delete the entire household and remove all members.")) return
 
@@ -147,7 +149,7 @@ function ViewHousehold() {
             setSnackbar({open: true, message: "Failed to delete household", severity: "error"})
         }
     }
-
+    //allows users to switch their household
     const handleSwitchHousehold = async() => {
         const nameUsed = name.trim() || selected
 
@@ -304,46 +306,6 @@ function ViewHousehold() {
             </Snackbar>
         </Container>
         
-        // <Typography variant="h4" sx={{ marginBottom: 3 }}>
-        //     Household Dashboard
-        // </Typography>
-
-        // <Grid container spacing={2}>
-        //     {users.map((user) => (
-        //     <Grid item xs={12} sm={6} md={4} key={user.id}>
-        //         <Card>
-        //         <CardContent>
-        //             <Typography variant="h6">{user.name}</Typography>
-        //             <Typography variant="body2">Email: {user.email}</Typography>
-        //             <Typography variant="body2">Role: {user.role}</Typography>
-        //             {currentUserRole === "admin" && user.email !== currentUser && (
-        //             <div>
-        //                 <Button color="error" variant="contained" sx={{ marginTop: 1 }} onClick={() => removeUser(user.id)}>
-        //                     Remove User
-        //                 </Button>
-        //                 <Button color="primary" variant="contained" sx={{ marginTop: 1 }} onClick={() => changeUserRole(user.id, user.role)}>
-        //                     Change Role
-        //                 </Button>
-        //             </div>
-        //             )}
-        //             {user.email === currentUser && (
-        //             <Typography sx={{ marginTop: 1, fontStyle: "italic" }}>This is you</Typography>
-        //             )}
-        //         </CardContent>
-        //         </Card>
-        //     </Grid>
-        //     ))}
-        // </Grid>
-
-        // <Snackbar
-        //     open={snackbar.open}
-        //     autoHideDuration={3000}
-        //     onClose={() => setSnackbar({ ...snackbar, open: false })}
-        // >
-        //     <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
-        //     {snackbar.message}
-        //     </Alert>
-        // </Snackbar>
        
     )
 }
