@@ -111,7 +111,7 @@ function Dashboard(){
 
 //handle when a meal is dragged onto a new day on the calendar
     const handleEventDrop = async(info) => {
-        const {id, title} = info.event
+        const {id} = info.event
         const newDay = info.event.startStr //new date 
  
         try{
@@ -120,8 +120,6 @@ function Dashboard(){
                 headers: {"Content-Type": "application/json", 
                     "x-user": localStorage.getItem("x-user")},
                 body: JSON.stringify({
-                    recipe: title,
-                    ingredients: "[]",
                     day: newDay
                 })
             })
