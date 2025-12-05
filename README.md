@@ -1,7 +1,7 @@
 # CSE264 Final Project
 ## Project Overview
 ### MealMate
-A meal planning site that allows you to plan meals for yourself and your household. This site allows you to find and add recipes along with adding recipes to the different days of the week. This will also create your grocery list for the household to allow for quicker planning
+A meal planning site that allows you to plan meals for yourself and your household. This site allows you to find new recipes from themealdb and add custom recipes. Users can then add recipes to the different days of the week. This will also create your grocery list for the household to allow for quicker planning
 
 ## Team Members & Roles
 ### Joshua Bower
