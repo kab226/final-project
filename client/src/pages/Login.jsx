@@ -3,8 +3,8 @@ Used GoogleLogin for the authentication portion of the project instead of hashin
 Used MateiralUI components and icons for styling
 */
 
-import { GoogleLogin } from '@react-oauth/google';
-import { useNavigate } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google'
+import { useNavigate } from 'react-router-dom'
 import {Grid, Box, Paper, Typography, List, ListItem, ListItemIcon, ListItemText} from '@mui/material'
 import RestaurantMenuIcon from '@mui/icons-material/RestaurantMenu'
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'

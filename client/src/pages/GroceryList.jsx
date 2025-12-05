@@ -1,3 +1,6 @@
+//this is the grocery list page
+//it will extract the ingredients from the recipes in the week-recipes table and allows the user to add their own items to the list
+
 import React, { useEffect, useState } from "react"
 import {Box, Typography, Paper, TextField, Button, IconButton, List, ListItem, ListItemText, Divider, Container, Grid} from "@mui/material"
 import DeleteIcon from "@mui/icons-material/Delete"
