@@ -168,7 +168,7 @@ app.put('/grocery-list/:id', requireUser, (req,res) => {
         res.send('error', errr)
     }
 })
-//deletes an entry based on the id
+//deletes an item from the grocery list
 app.delete('/grocery-list/:id', requireUser, (req, res) => {
     try{
         const id = req.params.id
@@ -202,50 +202,8 @@ app.post('/saved-recipes',requireUser, (req, res) => {
         res.send('error', err)
     }
 })
-//updates an entry in the database based on the req body
-app.put('/saved-recipes/:id', requireUser, (req,res) => {
-    try{
-        const id = req.params.id
-        const body = req.body
-        let qs = `UPDATE "SavedRecipes" SET recipe = '${body.recipe}', ingredients = '${body.ingredients}', notes = '${body.notes}' where id = ${id}`
-        query(qs).then(data => res.send(`${data.rowCount} row updated`))
-    }catch (errr){
-        res.send('error', errr)
-    }
-})
-//deletes an entry based on the id
-app.delete('/saved-recipes/:id', requireUser, (req, res) => {
-    try{
-        const id = req.params.id
-        const qs = `DELETE from "SavedRecipes" where id = ${id}`
-        query(qs).then(data => res.send(`${data.rowCount} row deleted`))
-    }catch(err){
-        res.send('error', err)
-    }
-})
 
 
-//UserInformation
-//gets all the users in database
-app.get('/users', requireAdmin, (_req, res) =>{
-    try{
-        const qs = `SELECT * from "UserInformation"`
-        query(qs).then(data => {res.json(data.rows)})
-
-    }catch(err){
-        console.log(err)
-    }
-})
-//adds a new user to database
-app.post('/users', requireAdmin, (req, res) => {
-    try {
-        let body = req.body
-        let qs =`INSERT into "UserInformation" (name, google_id, email, household_id, role) values ('${body.name}', '${body.google_id}', '${body.email}', ${body.household_id}, '${body.role}')`
-        query(qs).then(data => res.send(`${data.rowCount} row updated`))
-    } catch (error) {
-        res.send('error', err)
-    }
-})
 //updates a role in the database based on the req body
 app.put('/users/:id', requireUser, requireAdmin, (req,res) => {
     try{
@@ -258,16 +216,6 @@ app.put('/users/:id', requireUser, requireAdmin, (req,res) => {
     }
 })
 
-//deletes an entry based on the id
-app.delete('/users/:id', requireUser, requireAdmin, (req, res) => {
-    try{
-        const id = req.params.id
-        const qs = `DELETE from "UserInformation" where id = ${id}`
-        query(qs).then(data => res.send(`${data.rowCount} row deleted`))
-    }catch(err){
-        res.send('error', err)
-    }
-})
 
 
 //weeklyRecipes
@@ -283,7 +231,7 @@ app.get('/week-recipes', requireUser, (req, res) =>{
     }
 })
 
-//adds a new recipe to database
+//adds a new recipe to week table
 app.post('/week-recipes', requireUser, (req, res) => {
     try {
         const householdId = req.user.household_id
@@ -296,12 +244,12 @@ app.post('/week-recipes', requireUser, (req, res) => {
     }
 })
 
-//updates an entry in the database based on the req body
+//updates the day for the week-recipes
 app.put('/week-recipes/:id', requireUser, (req,res) => {
     try{
         const id = req.params.id
         const body = req.body
-        let qs = `UPDATE "WeekRecipes" SET recipe = '${body.recipe}', ingredients = '${body.ingredients}', day = '${body.day}' where id = ${id}`
+        let qs = `UPDATE "WeekRecipes" SET day = '${body.day}' where id = ${id}`
         query(qs).then(data => res.send(`${data.rowCount} row updated`))
     }catch (errr){
         res.send('error', errr)
@@ -330,27 +278,8 @@ app.get('/households', requireUser, (_req, res) =>{
         console.log(err)
     }
 })
-//adds a new household to database
-app.post('/households', requireUser, (req, res) => {
-    try {
-        let body = req.body
-        let qs =`INSERT into "Households" (household_name) values ('${body.household_name}')`
-        query(qs).then(data => res.send(`${data.rowCount} row updated`))
-    } catch (error) {
-        res.send('error', err)
-    }
-})
-//updates an entry in the database based on the req body
-app.put('/households/:id', requireUser, (req,res) => {
-    try{
-        const id = req.params.id
-        const body = req.body
-        let qs = `UPDATE "Households" SET household_name = '${body.household_name}' where id = ${id}`
-        query(qs).then(data => res.send(`${data.rowCount} row updated`))
-    }catch (errr){
-        res.send('error', errr)
-    }
-})
+
+
 //deletes an entry based on the id
 app.delete('/households/:id', requireUser, async(req, res) => {
     try{
@@ -372,7 +301,7 @@ app.delete('/households/:id', requireUser, async(req, res) => {
     }
 })
 
-
+//adds a user to the household by changing the user's household_id
 app.post('/households/join', requireUser, async (req, res) => {
   const { household_name } = req.body
   const userId = req.user.id
@@ -478,5 +407,5 @@ app.delete('/household/users/:id', requireUser, async (req, res) => {
 app.listen(app.get('port'), () => {
     console.log('App is running at http://localhost:%d in %s mode', app.get('port'), app.get('env'));
     console.log('  Press CTRL-C to stop\n');
-  });
+  })
   
