@@ -17,7 +17,7 @@ app.use(cors())
 //auth client 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID)
 
-//Put approved admin emails here 
+//Put approved admin emails here if override needed (i.e. not only admin in household)
 const approvedAdmins = []
 
 
@@ -66,10 +66,9 @@ app.get('/up', (_req, res) => {
   res.json({status: 'up'})
 })
 
-//Authentication with Google routes
-//Need to update UserInformation table to have id (autogenerates), google_id, email, name 
+//Authentication with Google route
 app.post("/auth/google", async(req, res) => {
-    // console.log("Received body:", req.body)
+
     try{
         const {idToken} = req.body 
 
@@ -398,10 +397,6 @@ app.delete('/household/users/:id', requireUser, async (req, res) => {
     res.status(500).json({ error: "Error removing user" })
   }
 })
-
-
-
-
 
 
 app.listen(app.get('port'), () => {
